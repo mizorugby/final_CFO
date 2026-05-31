@@ -348,16 +348,21 @@
  
   <div class="net-worth-card">
     <div class="net-worth-label">純資産 / Net Worth</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;margin-bottom:10px">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;margin-bottom:10px">
       <div style="padding-right:24px;border-right:1px solid var(--border)">
         <div style="font-size:9px;letter-spacing:0.25em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px">NISA除く（銀行ベース）</div>
         <div class="net-worth-amount" id="netWorthDisplay">—<span class="unit">円</span></div>
         <div style="font-size:9px;color:var(--text-muted);margin-top:6px;line-height:1.6" id="formulaThis"></div>
       </div>
-      <div style="padding-left:24px">
+      <div style="padding:0 24px;border-right:1px solid var(--border)">
         <div style="font-size:9px;letter-spacing:0.25em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px">運用込み（銀行＋持株＋NISA）</div>
         <div class="net-worth-amount" id="netWorthWithNisa" style="color:var(--accent)">—<span class="unit">円</span></div>
         <div style="font-size:9px;color:var(--text-muted);margin-top:6px;line-height:1.6" id="formulaWithNisa"></div>
+      </div>
+      <div style="padding-left:24px">
+        <div style="font-size:9px;letter-spacing:0.25em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px">☑ 選択口座ベース</div>
+        <div class="net-worth-amount" id="netWorthChecked" style="color:var(--green)">—<span class="unit">円</span></div>
+        <div style="font-size:9px;color:var(--text-muted);margin-top:6px;line-height:1.6" id="formulaChecked"></div>
       </div>
     </div>
     <div class="net-worth-sub">銀行残高 ＋ 給与 − CC − 固定費　／　毎月25日（前営業日）にメイン口座を自動更新</div>
@@ -667,12 +672,12 @@ function monthLabel(offset) {
  
 const DEFAULT_DATA = {
   banks: [
-    {id:'b1',icon:'🏦',name:'メインバンク',value:0,note:''},
-    {id:'b2',icon:'🏦',name:'サブバンク',value:0,note:''},
-    {id:'b3',icon:'🏦',name:'給与口座',value:0,note:''},
-    {id:'b4',icon:'🏦',name:'口座④',value:0,note:''},
-    {id:'b5',icon:'🏦',name:'口座⑤',value:0,note:''},
-    {id:'b6',icon:'🏦',name:'口座⑥',value:0,note:''},
+    {id:'b1',icon:'🏦',name:'メインバンク',value:0,note:'',checked:true},
+    {id:'b2',icon:'🏦',name:'サブバンク',value:0,note:'',checked:true},
+    {id:'b3',icon:'🏦',name:'給与口座',value:0,note:'',checked:true},
+    {id:'b4',icon:'🏦',name:'口座④',value:0,note:'',checked:true},
+    {id:'b5',icon:'🏦',name:'口座⑤',value:0,note:'',checked:true},
+    {id:'b6',icon:'🏦',name:'口座⑥',value:0,note:'',checked:true},
   ],
   credits: [
     {id:'c1',icon:'💳',name:'カード①',thisMonth:0,nextMonth:0,note:''},
@@ -905,16 +910,24 @@ function renderSimpleCard(item, category, idx) {
   const deleteBtn = (!isMainBank && category==='banks')
     ? '<button class="delete-btn" onclick="deleteItem(\'banks\',\''+item.id+'\',event)">削除</button>'
     : '';
+  const checked = item.checked !== false;
+  const checkboxHtml = (category==='banks')
+    ? '<label style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text-muted);cursor:pointer;margin-bottom:6px">'+
+        '<input type="checkbox" class="bank-check" '+(checked?'checked':'')+' style="width:14px;height:14px;cursor:pointer;accent-color:var(--accent)">'+
+        '純資産に含める'+
+      '</label>'
+    : '';
   card.innerHTML =
     '<div class="edit-hint">編集</div>'+
     deleteBtn+
     '<div class="card-display">'+
       '<div class="card-icon">'+item.icon+'</div>'+
+      checkboxHtml+
       '<div style="display:flex;align-items:center;margin-bottom:5px">'+
         '<div class="card-name" style="margin-bottom:0">'+item.name+'</div>'+
         mainBadge+
       '</div>'+
-      '<div class="card-value">'+fmt(item.value)+'<span style="font-size:13px;color:var(--text-muted);margin-left:2px">円</span></div>'+
+      '<div class="card-value" style="'+(checked?'':'opacity:0.4')+'">'+fmt(item.value)+'<span style="font-size:13px;color:var(--text-muted);margin-left:2px">円</span></div>'+
       (item.note?'<div class="card-sub" style="margin-top:4px;font-style:italic">'+item.note+'</div>':'')+
     '</div>'+
     '<div class="card-edit">'+
@@ -926,6 +939,14 @@ function renderSimpleCard(item, category, idx) {
       '<textarea class="edit-note inp-note" placeholder="メモ（任意）">'+(item.note||'')+'</textarea>'+
       '<div class="btn-row"><button class="btn-save">保存</button><button class="btn-cancel">キャンセル</button></div>'+
     '</div>';
+  // チェックボックス変更でリアルタイム保存
+  if (category==='banks') {
+    card.querySelector('.bank-check').addEventListener('change', e => {
+      e.stopPropagation();
+      data.banks[idx].checked = e.target.checked;
+      saveData(data); renderAll();
+    });
+  }
   card.querySelector('.card-display').addEventListener('click', e => {
     if (card.classList.contains('editing')) return;
     card.closest('.cards-grid').querySelectorAll('.card.editing').forEach(c=>c.classList.remove('editing'));
@@ -1178,7 +1199,7 @@ function deleteItem(category, id, e) {
 }
  
 function addBank() {
-  data.banks.push({id:genId('b'),icon:'🏦',name:'口座'+(data.banks.length+1),value:0,note:''});
+  data.banks.push({id:genId('b'),icon:'🏦',name:'口座'+(data.banks.length+1),value:0,note:'',checked:true});
   saveData(data); renderAll();
 }
  
@@ -1211,6 +1232,7 @@ function renderAll() {
   });
  
   const totalBank      = data.banks.reduce((s,b)=>s+b.value,0);
+  const totalBankChecked = data.banks.filter(b=>b.checked!==false).reduce((s,b)=>s+b.value,0);
   const totalCreditT   = data.credits.reduce((s,c)=>s+c.thisMonth,0);
   const totalCreditN   = data.credits.reduce((s,c)=>s+c.nextMonth,0);
   const totalNisa      = data.invests.filter(v=>v.nisaType).reduce((s,v)=>s+(v.total||0),0);
@@ -1283,6 +1305,12 @@ function renderAll() {
     '（引落前）',
   ].filter(Boolean).join('\n');
  
+  // 選択口座ベース純資産（チェック済み口座のみ）
+  const ccCheckedOwed  = (debitDone ? 0 : totalCreditTNonAmex) + (amexDone ? 0 : totalCreditTAmex);
+  const fixedCheckedOwed = debitDone ? 0 : totalFixed;
+  const netWorthChecked = totalBankChecked + salaryThis - ccCheckedOwed - fixedCheckedOwed;
+  const checkedBankNames = data.banks.filter(b=>b.checked!==false).map(b=>b.name).join('・');
+ 
   const nisaFormulaParts = [
     '純資産 '+fmtF(netWorthThis),
     totalInvest ? '＋ 運用 '+fmtF(totalInvest) : '',
@@ -1290,6 +1318,13 @@ function renderAll() {
  
   document.getElementById('netWorthDisplay').innerHTML     = fmt(netWorthThis)+'<span class="unit">円</span>';
   document.getElementById('netWorthWithNisa').innerHTML    = fmt(netWorthWithNisaThis)+'<span class="unit">円</span>';
+  document.getElementById('netWorthChecked').innerHTML     = fmt(netWorthChecked)+'<span class="unit">円</span>';
+  document.getElementById('formulaChecked').style.whiteSpace = 'pre';
+  document.getElementById('formulaChecked').textContent   =
+    (checkedBankNames ? checkedBankNames+'\n' : '（未選択）\n')+
+    (salaryThis   ? '＋ 給与 '+fmtF(salaryThis) +'\n': '')+
+    (ccCheckedOwed  ? '▲ CC未払 '+fmtF(ccCheckedOwed)+'\n' : (debitDone&&amexDone?'（CC引落済）\n':''))+
+    (fixedCheckedOwed ? '▲ 固定費 '+fmtF(fixedCheckedOwed) : '（固定費引落済）');
   document.getElementById('formulaThis').style.whiteSpace  = 'pre';
   document.getElementById('formulaThis').textContent       = thisFormulaParts;
   document.getElementById('formulaWithNisa').style.whiteSpace = 'pre';
