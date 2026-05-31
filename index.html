@@ -78,7 +78,7 @@
   }
   .logout-btn:hover { color:#1a1714; border-color:#c8c0b5; }
   .user-label { font-size:10px; color:#9a9189; margin-right:8px; }
-
+ 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
     --bg: #f8f7f5;
@@ -100,12 +100,12 @@
   }
   body { background:var(--bg); color:var(--text); font-family:Tahoma,'MS PGothic','ＭＳ Ｐゴシック',sans-serif; font-weight:400; min-height:100vh; padding:48px 24px; line-height:1.6; }
   .container { max-width:940px; margin:0 auto; }
-
+ 
   /* Header */
   .header { display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:44px; padding-bottom:20px; border-bottom:1px solid var(--border); }
   .header-title { font-family:Tahoma,'MS PGothic','ＭＳ Ｐゴシック',sans-serif; font-size:13px; font-weight:400; letter-spacing:0.35em; text-transform:uppercase; color:var(--accent); }
   .header-date { font-size:11px; letter-spacing:0.12em; color:var(--text-muted); }
-
+ 
   /* Net worth hero */
   .net-worth-card { background:var(--surface); border:1px solid var(--border); border-radius:2px; padding:36px 40px 30px; margin-bottom:28px; position:relative; box-shadow:0 1px 4px rgba(0,0,0,0.04); }
   .net-worth-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:var(--accent); border-radius:2px 2px 0 0; }
@@ -113,7 +113,7 @@
   .net-worth-amount { font-family:Tahoma,'MS PGothic','ＭＳ Ｐゴシック',sans-serif; font-size:52px; font-weight:300; color:var(--text); letter-spacing:-0.01em; line-height:1; margin-bottom:6px; }
   .net-worth-amount .unit { font-size:20px; color:var(--text-muted); margin-left:4px; }
   .net-worth-sub { font-size:11px; color:var(--text-muted); letter-spacing:0.06em; }
-
+ 
   /* Summary bar */
   .summary-bar { display:grid; gap:2px; margin-bottom:28px; }
   .summary-item { background:var(--surface); padding:16px 18px; border:1px solid var(--border); }
@@ -122,36 +122,36 @@
   .summary-value.negative { color:var(--red); }
   .summary-value.green { color:var(--green); }
   .summary-value.orange { color:var(--orange); }
-
+ 
   /* Section */
   .section { margin-bottom:28px; }
   .section-header { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
   .section-title { font-size:10px; letter-spacing:0.35em; text-transform:uppercase; color:var(--accent); font-weight:400; white-space:nowrap; }
   .section-line { flex:1; height:1px; background:var(--border); }
-
+ 
   /* Cards grid */
   .cards-grid { display:grid; gap:2px; }
   .cards-grid.cols-2 { grid-template-columns:repeat(2,1fr); }
   .cards-grid.cols-3 { grid-template-columns:repeat(3,1fr); }
-
+ 
   /* Base card */
   .card { background:var(--surface); border:1px solid var(--border); padding:20px; transition:border-color 0.15s,box-shadow 0.15s; cursor:pointer; position:relative; -webkit-tap-highlight-color:transparent; }
   .card:hover { border-color:var(--border-strong); box-shadow:0 1px 6px rgba(0,0,0,0.06); }
   .card.editing { border-color:var(--accent); box-shadow:0 0 0 2px var(--accent-light); cursor:default; }
   .edit-hint { position:absolute; top:9px; right:11px; font-size:9px; letter-spacing:0.15em; color:var(--text-muted); opacity:0; transition:opacity 0.15s; text-transform:uppercase; }
   .card:hover:not(.editing) .edit-hint { opacity:1; }
-
+ 
   .card-icon { font-size:14px; margin-bottom:8px; opacity:0.5; }
   .card-name { font-size:11px; color:var(--text-muted); letter-spacing:0.06em; margin-bottom:5px; }
   .card-value { font-family:Tahoma,'MS PGothic','ＭＳ Ｐゴシック',sans-serif; font-size:26px; font-weight:400; color:var(--text); line-height:1; margin-bottom:2px; }
   .card-value.negative { color:var(--red); }
   .card-sub { font-size:10px; color:var(--text-muted); }
-
+ 
   /* Edit mode */
   .card-edit { display:none; flex-direction:column; gap:7px; }
   .card.editing .card-display { display:none; }
   .card.editing .card-edit { display:flex; }
-
+ 
   .edit-label { font-size:9px; letter-spacing:0.2em; color:var(--text-muted); text-transform:uppercase; margin-bottom:1px; }
   .edit-sublabel { font-size:11px; color:var(--text-muted); margin-bottom:3px; }
   .edit-name-input {
@@ -182,14 +182,14 @@
   .btn-row { display:flex; gap:8px; }
   .edit-month-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
   .edit-month-col { display:flex; flex-direction:column; gap:3px; }
-
+ 
   /* Credit 2-month display */
   .credit-months { display:flex; gap:10px; margin-top:4px; }
   .credit-month-block { flex:1; }
   .credit-month-tag { font-size:9px; letter-spacing:0.15em; text-transform:uppercase; color:var(--text-muted); margin-bottom:3px; }
   .credit-month-val { font-family:Tahoma,'MS PGothic','ＭＳ Ｐゴシック',sans-serif; font-size:19px; color:var(--red); line-height:1; }
   .credit-divider { width:1px; background:var(--border); align-self:stretch; }
-
+ 
   /* Fixed costs */
   .fixed-card { background:var(--surface); border:1px solid var(--border); padding:20px 22px; cursor:pointer; transition:border-color 0.15s,box-shadow 0.15s; position:relative; }
   .fixed-card:hover { border-color:var(--border-strong); box-shadow:0 1px 6px rgba(0,0,0,0.06); }
@@ -214,7 +214,7 @@
   .fixed-edit-row { display:grid; grid-template-columns:1fr 1fr; gap:7px; align-items:end; }
   .fixed-edit-name { background:var(--bg); border:1px solid var(--border); color:var(--text-mid); font-family:Tahoma,'MS PGothic','ＭＳ Ｐゴシック',sans-serif; font-size:16px; padding:9px 10px; width:100%; outline:none; border-radius:1px; -webkit-appearance:none; }
   .fixed-edit-name:focus { border-color:var(--accent); }
-
+ 
   /* Salary card */
   .salary-card { background:var(--surface); border:1px solid var(--border); padding:20px 22px; cursor:pointer; transition:border-color 0.15s,box-shadow 0.15s; position:relative; }
   .salary-card:hover { border-color:var(--border-strong); box-shadow:0 1px 6px rgba(0,0,0,0.06); }
@@ -237,7 +237,7 @@
   .salary-edit { display:none; flex-direction:column; gap:8px; }
   .salary-card.editing .salary-display { display:none; }
   .salary-card.editing .salary-edit { display:flex; }
-
+ 
   /* NISA */
   .nisa-bar-wrap { margin-top:9px; }
   .nisa-bar-bg { height:2px; background:var(--border); border-radius:2px; overflow:hidden; }
@@ -261,7 +261,7 @@
   .stock-pnl-val { font-size:15px; font-weight:400; }
   .stock-pnl-val.gain { color:var(--green); }
   .stock-pnl-val.loss { color:var(--red); }
-
+ 
   /* Memo */
   .memo-card { background:var(--surface); border:1px solid var(--border); padding:20px 22px; margin-top:28px; }
   .memo-textarea { background:transparent; border:none; border-top:1px solid var(--border); color:var(--text-mid); font-family:Tahoma,'MS PGothic','ＭＳ Ｐゴシック',sans-serif; font-size:16px; line-height:1.8; padding:12px 0 0; width:100%; outline:none; resize:none; min-height:64px; margin-top:12px; -webkit-appearance:none; }
@@ -282,7 +282,7 @@
   .card:hover .delete-btn { opacity:1; }
   .delete-btn:hover { color:var(--red); border-color:var(--red); }
   .last-updated { text-align:right; font-size:10px; color:var(--text-muted); letter-spacing:0.08em; margin-top:36px; padding-top:16px; border-top:1px solid var(--border); }
-
+ 
   @media (max-width:640px) {
     body { padding:16px 12px; padding-bottom:calc(16px + env(safe-area-inset-bottom)); }
     .net-worth-amount { font-size:32px; }
@@ -313,7 +313,7 @@
 </head>
 <body>
 <div class="container">
-
+ 
   <!-- 認証画面 -->
   <div id="auth-screen">
     <div class="auth-box">
@@ -331,13 +331,13 @@
       <div class="auth-error" id="auth-error"></div>
     </div>
   </div>
-
+ 
   <div id="app-content" style="display:none">
-
+ 
   <div id="storage-warn" style="display:none;background:#fff3cd;border:1px solid #f0c040;color:#7a5c00;font-size:13px;padding:12px 16px;margin-bottom:16px;border-radius:2px;line-height:1.5">
     ⚠️ データの保存ができません。Safariの「プライベートブラウズ」モードではデータが保存されません。通常モードでご利用ください。
   </div>
-
+ 
   <div class="header">
     <div class="header-title">Personal Finance</div>
     <div style="display:flex;align-items:center;gap:12px">
@@ -345,7 +345,7 @@
       <button class="logout-btn" onclick="logout()">ログアウト</button>
     </div>
   </div>
-
+ 
   <div class="net-worth-card">
     <div class="net-worth-label">純資産 / Net Worth</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;margin-bottom:10px">
@@ -362,7 +362,7 @@
     </div>
     <div class="net-worth-sub">銀行残高 ＋ 給与 − CC − 固定費　／　毎月25日（前営業日）にメイン口座を自動更新</div>
   </div>
-
+ 
   <div class="summary-bar" style="grid-template-columns:repeat(7,1fr)">
     <div class="summary-item">
       <div class="summary-label">総資産（銀行）</div>
@@ -399,7 +399,7 @@
       <div class="summary-value orange" id="totalFixed">—</div>
     </div>
   </div>
-
+ 
   <div class="section">
     <div class="section-header">
       <div class="section-title">銀行口座</div>
@@ -408,7 +408,7 @@
     </div>
     <div class="cards-grid cols-3" id="bankGrid"></div>
   </div>
-
+ 
   <div class="section">
     <div class="section-header">
       <div class="section-title">クレジットカード</div>
@@ -417,7 +417,7 @@
     </div>
     <div class="cards-grid cols-3" id="creditGrid"></div>
   </div>
-
+ 
   <div class="section">
     <div class="section-header">
       <div class="section-title">固定費 / 口座引落</div>
@@ -426,29 +426,29 @@
     </div>
     <div id="fixedCard"></div>
   </div>
-
+ 
   <div class="section">
     <div class="section-header"><div class="section-title">給与 / 入金予定</div><div class="section-line"></div></div>
     <div id="salaryCard"></div>
   </div>
-
+ 
   <div class="section">
     <div class="section-header"><div class="section-title">投資・貯蓄</div><div class="section-line"></div></div>
     <div class="cards-grid cols-2" id="investGrid"></div>
   </div>
-
+ 
   <div class="memo-card">
     <div class="section-title" style="margin-bottom:0">メモ</div>
     <textarea class="memo-textarea" id="memoArea" placeholder="気になること、今月の振り返り、目標など…" rows="3"></textarea>
   </div>
-
+ 
   <div class="last-updated" id="lastUpdated"></div>
-
+ 
   </div><!-- /app-content -->
 </div>
-
+ 
 <script>
-
+ 
 // ══════════════════════════════════════════════
 //  Auth（固定ID・PW）
 // ══════════════════════════════════════════════
@@ -456,12 +456,12 @@ const FIXED_ID_HASH = '10818c4831ebe84d39a6d4dd2c9a25900d324f2972e037f8d17aaff0b
 const FIXED_PW_HASH = '436971326e06501c6daabd06f1a2b2c0831ee1a87dae93817818bfc965d6fa50';
 const SESSION_KEY   = 'mizo_session';
 const SESSION_TTL   = 60 * 60 * 1000; // 60分
-
+ 
 async function sha256(str) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
   return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
 }
-
+ 
 function getSession() {
   try { return JSON.parse(localStorage.getItem(SESSION_KEY)||'null'); } catch(e){ return null; }
 }
@@ -473,7 +473,7 @@ function isSessionValid() {
   return (Date.now() - s.ts) < SESSION_TTL;
 }
 function touchSession() { saveSession(); }
-
+ 
 function renderAuthScreen() {
   document.getElementById('auth-screen').style.display='flex';
   document.getElementById('app-content').style.display='none';
@@ -482,7 +482,7 @@ function renderAuthScreen() {
   document.getElementById('auth-pw').value='';
   setTimeout(()=>document.getElementById('auth-id').focus(), 100);
 }
-
+ 
 async function handleAuth(e) {
   if (e) e.preventDefault();
   const id  = document.getElementById('auth-id').value.trim();
@@ -505,7 +505,7 @@ async function handleAuth(e) {
     document.getElementById('auth-pw').value='';
   }
 }
-
+ 
 function unlockApp() {
   currentStorageKey = STORAGE_KEY;
   data = loadUserData();
@@ -517,7 +517,7 @@ function unlockApp() {
   });
   renderAll();
 }
-
+ 
 function logout() {
   clearSession();
   data = null;
@@ -525,21 +525,21 @@ function logout() {
   document.getElementById('app-content').style.display='none';
   renderAuthScreen();
 }
-
+ 
 async function initAuth() {
   if (isSessionValid()) { touchSession(); unlockApp(); return; }
   clearSession();
   renderAuthScreen();
 }
-
+ 
 document.getElementById('auth-form').addEventListener('submit', handleAuth);
-
+ 
 // ══════════════════════════════════════════════
 //  Data & Storage
 // ══════════════════════════════════════════════
 const STORAGE_KEY = 'mizo_finance_v3'; // fallback only
 let currentStorageKey = null;
-
+ 
 function loadUserData() {
   const key = currentStorageKey || STORAGE_KEY;
   try {
@@ -572,10 +572,10 @@ function loadUserData() {
     d.amexAutoProcessMonth  = saved.amexAutoProcessMonth||null;
     d.creditShiftMonth      = saved.creditShiftMonth||null;
     d.memo = saved.memo||''; d.updatedAt = saved.updatedAt||null;
-
+ 
     const now=new Date(), thisY=now.getFullYear(), thisM=now.getMonth();
     const monthRk=thisY+'-'+thisM;
-
+ 
     if (d.creditShiftMonth !== monthRk) {
       d.salary.thisMonth=d.salary.nextMonth; d.salary.nextMonth=0;
       d.credits.forEach(c=>{ if(!isAmex(c.name)){ c.thisMonth=c.nextMonth; c.nextMonth=0; } });
@@ -608,7 +608,7 @@ function loadUserData() {
     return d;
   } catch(e) { return JSON.parse(JSON.stringify(DEFAULT_DATA)); }
 }
-
+ 
 function isJPHoliday(date) {
   const m = date.getMonth()+1, d = date.getDate();
   const fixed = [[1,1],[1,2],[1,3],[2,11],[2,23],[3,20],[4,29],[5,3],[5,4],[5,5],[7,15],[8,11],[9,21],[10,14],[11,3],[11,23]];
@@ -664,7 +664,7 @@ function monthLabel(offset) {
   const d = new Date(); d.setMonth(d.getMonth()+offset);
   return (d.getMonth()+1)+'月';
 }
-
+ 
 const DEFAULT_DATA = {
   banks: [
     {id:'b1',icon:'🏦',name:'メインバンク',value:0,note:''},
@@ -701,7 +701,7 @@ const DEFAULT_DATA = {
   creditShiftMonth:null,
   memo:'', updatedAt:null
 };
-
+ 
 function saveData(d) {
   const key = currentStorageKey || STORAGE_KEY;
   d.updatedAt = new Date().toISOString();
@@ -716,7 +716,7 @@ function saveData(d) {
   const el = document.getElementById('lastUpdated');
   if (el) el.textContent = '最終更新 '+ts.toLocaleDateString('ja-JP')+' '+ts.toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
 }
-
+ 
 function fmt(n) {
   if (!n || isNaN(n)) return '0';
   const abs=Math.abs(n);
@@ -725,17 +725,17 @@ function fmt(n) {
   if (abs>=10000) return sign+(abs/10000).toFixed(1)+'万';
   return sign+abs.toLocaleString('ja-JP');
 }
-
+ 
 // ── NISA card (total + profit → principal auto-calc) ──
 const NISA_TOTAL_LIMIT = 24000000;
-
+ 
 function renderNisaCard(item, idx) {
   const card = document.createElement('div');
   card.className = 'card';
   const total     = item.total||0;
   const profit    = item.profit||0;
   const principal = Math.max(0, total - profit); // 自動計算
-
+ 
   // 全NISAの元本合計（枠利用率用）
   const allNisa        = data.invests.filter(v=>v.nisaType);
   const totalPrincipal = allNisa.reduce((s,v)=>s+Math.max(0,(v.total||0)-(v.profit||0)),0);
@@ -743,7 +743,7 @@ function renderNisaCard(item, idx) {
   const pctPrincipal   = Math.min(100, (totalPrincipal / NISA_TOTAL_LIMIT) * 100);
   const pctProfit      = Math.min(100 - pctPrincipal, (totalProfit / NISA_TOTAL_LIMIT) * 100);
   const profitRate     = principal > 0 ? ((profit / principal) * 100).toFixed(1) : null;
-
+ 
   card.innerHTML =
     '<div class="edit-hint">編集</div>'+
     '<div class="card-display">'+
@@ -792,7 +792,7 @@ function renderNisaCard(item, idx) {
       '<textarea class="edit-note inp-note" placeholder="メモ（任意）">'+(item.note||'')+'</textarea>'+
       '<div class="btn-row"><button class="btn-save">保存</button><button class="btn-cancel">キャンセル</button></div>'+
     '</div>';
-
+ 
   card.querySelector('.card-display').addEventListener('click', e => {
     if (card.classList.contains('editing')) return;
     card.closest('.cards-grid').querySelectorAll('.card.editing').forEach(c=>c.classList.remove('editing'));
@@ -812,7 +812,7 @@ function renderNisaCard(item, idx) {
   });
   return card;
 }
-
+ 
 // ── Stock card (持株) ──
 function renderStockCard(item, idx) {
   const card = document.createElement('div');
@@ -826,7 +826,7 @@ function renderStockCard(item, idx) {
   const pnlPct  = cost > 0 ? ((pnl / cost) * 100).toFixed(2) : null;
   const pnlClass = pnl > 0 ? 'gain' : pnl < 0 ? 'loss' : '';
   const pnlSign  = pnl > 0 ? '+' : '';
-
+ 
   card.innerHTML =
     '<div class="edit-hint">編集</div>'+
     '<div class="card-display">'+
@@ -872,7 +872,7 @@ function renderStockCard(item, idx) {
       '<textarea class="edit-note inp-note" placeholder="メモ（任意）">'+(item.note||'')+'</textarea>'+
       '<div class="btn-row"><button class="btn-save">保存</button><button class="btn-cancel">キャンセル</button></div>'+
     '</div>';
-
+ 
   card.querySelector('.card-display').addEventListener('click', e => {
     if (card.classList.contains('editing')) return;
     card.closest('.cards-grid').querySelectorAll('.card.editing').forEach(c=>c.classList.remove('editing'));
@@ -893,8 +893,8 @@ function renderStockCard(item, idx) {
   });
   return card;
 }
-
-
+ 
+ 
 function renderSimpleCard(item, category, idx) {
   const card = document.createElement('div');
   card.className = 'card';
@@ -944,7 +944,7 @@ function renderSimpleCard(item, category, idx) {
   });
   return card;
 }
-
+ 
 // ── Credit card (2-month) ──
 function renderCreditCard(item, idx) {
   const card = document.createElement('div');
@@ -1024,7 +1024,7 @@ function renderCreditCard(item, idx) {
   });
   return card;
 }
-
+ 
 // ── Fixed costs card ──
 function renderFixedCard() {
   const wrap = document.getElementById('fixedCard');
@@ -1094,7 +1094,7 @@ function renderFixedCard() {
   });
   wrap.appendChild(card);
 }
-
+ 
 // ── Salary card ──
 function renderSalaryCard() {
   const wrap = document.getElementById('salaryCard');
@@ -1164,52 +1164,52 @@ function renderSalaryCard() {
   });
   wrap.appendChild(card);
 }
-
+ 
 // ── 追加・削除 ──
 function genId(prefix) {
   return prefix + Date.now().toString(36) + Math.random().toString(36).slice(2,5);
 }
-
+ 
 function deleteItem(category, id, e) {
   if (e) e.stopPropagation();
   if (!confirm('削除しますか？')) return;
   data[category] = data[category].filter(item=>item.id!==id);
   saveData(data); renderAll();
 }
-
+ 
 function addBank() {
   data.banks.push({id:genId('b'),icon:'🏦',name:'口座'+(data.banks.length+1),value:0,note:''});
   saveData(data); renderAll();
 }
-
+ 
 function addCredit() {
   data.credits.push({id:genId('c'),icon:'💳',name:'カード'+(data.credits.length+1),thisMonth:0,nextMonth:0,note:''});
   saveData(data); renderAll();
 }
-
+ 
 function addFixed() {
   data.fixed.push({id:genId('f'),name:'項目'+(data.fixed.length+1),value:0});
   saveData(data); renderAll();
 }
-
+ 
 // ── Render all ──
 function renderAll() {
   const bg=document.getElementById('bankGrid'); bg.innerHTML='';
   data.banks.forEach((item,i)=>bg.appendChild(renderSimpleCard(item,'banks',i)));
-
+ 
   const cg=document.getElementById('creditGrid'); cg.innerHTML='';
   data.credits.forEach((item,i)=>cg.appendChild(renderCreditCard(item,i)));
-
+ 
   renderFixedCard();
   renderSalaryCard();
-
+ 
   const ig=document.getElementById('investGrid'); ig.innerHTML='';
   data.invests.forEach((item,i)=>{
     if (item.nisaType)  ig.appendChild(renderNisaCard(item,i));
     else if (item.stockType) ig.appendChild(renderStockCard(item,i));
     else ig.appendChild(renderSimpleCard(item,'invests',i));
   });
-
+ 
   const totalBank      = data.banks.reduce((s,b)=>s+b.value,0);
   const totalCreditT   = data.credits.reduce((s,c)=>s+c.thisMonth,0);
   const totalCreditN   = data.credits.reduce((s,c)=>s+c.nextMonth,0);
@@ -1219,12 +1219,12 @@ function renderAll() {
   const totalFixed     = data.fixed.reduce((s,f)=>s+f.value,0);
   const salaryThis     = data.salary.thisMonth;
   const salaryNext     = data.salary.nextMonth;
-
+ 
   // 総資産 = 銀行残高のみ
   const totalAssets    = totalBank;
   // 運用合計 = 持株時価 ＋ NISA ＋ その他投資
   const totalInvest    = totalStock + totalNisa + totalOther;
-
+ 
   // 引落済みフラグ判定
   const now2 = new Date();
   const monthRk2 = now2.getFullYear()+'-'+now2.getMonth();
@@ -1232,11 +1232,11 @@ function renderAll() {
   const amexDebitDate = calcAmexDebitDay(now2.getFullYear(), now2.getMonth());
   const amexMonthRk = amexDebitDate.getFullYear()+'-'+amexDebitDate.getMonth();
   const amexDone = data.amexAutoProcessMonth === amexMonthRk;
-
+ 
   // CC合計を「引落済か否か」で分類
   const totalCreditTAmex    = data.credits.filter(c=>isAmex(c.name)).reduce((s,c)=>s+c.thisMonth,0);
   const totalCreditTNonAmex = data.credits.filter(c=>!isAmex(c.name)).reduce((s,c)=>s+c.thisMonth,0);
-
+ 
   // 今月純資産：
   //   非アメックス今月CC → debitDoneなら引落済、そうでなければ引く
   //   アメックス今月CC  → amexDoneなら引落済、そうでなければ引く
@@ -1244,7 +1244,7 @@ function renderAll() {
   const ccThisOwed = (debitDone ? 0 : totalCreditTNonAmex) + (amexDone ? 0 : totalCreditTAmex);
   const fixedOwed  = debitDone ? 0 : totalFixed;
   const netWorthThis = totalBank + salaryThis - ccThisOwed - fixedOwed;
-
+ 
   // 来月純資産：
   //   引落前：CC今月（未払分）＋CC来月＋固定費×2
   //   引落済：CC来月＋固定費×1（今月分は残高反映済）
@@ -1252,10 +1252,10 @@ function renderAll() {
   const netWorthNext = debitDone
     ? totalBank + salaryNext - (amexDone ? 0 : totalCreditTAmex) - totalCreditN - totalFixed
     : totalBank + salaryNext - ccThisOwedForNext - totalCreditN - totalFixed * 2;
-
+ 
   // NISA込み純資産
   const netWorthWithNisaThis = netWorthThis + totalInvest;
-
+ 
   // 計算式テキスト生成
   const fmtF = n => fmt(n);
   const thisFormulaParts = [
@@ -1266,7 +1266,7 @@ function renderAll() {
     !debitDone&&totalCreditTAmex&&amexDone ? '　※アメックスは引落済' : '',
     debitDone&&totalCreditTAmex&&!amexDone ? '　※アメックス▲'+fmtF(totalCreditTAmex)+'は未払' : '',
   ].filter(Boolean).join('\n');
-
+ 
   const nextFormulaParts = debitDone ? [
     '銀行 '+fmtF(totalBank),
     salaryNext                           ? '＋ 給与来月 '+fmtF(salaryNext)             : '',
@@ -1282,11 +1282,13 @@ function renderAll() {
     totalFixed          ? '▲ 固定費×2 '+fmtF(totalFixed*2)         : '',
     '（引落前）',
   ].filter(Boolean).join('\n');
-
+ 
   const nisaFormulaParts = [
     '純資産 '+fmtF(netWorthThis),
     totalInvest ? '＋ 運用 '+fmtF(totalInvest) : '',
   ].filter(Boolean).join('\n');
+ 
+  document.getElementById('netWorthDisplay').innerHTML     = fmt(netWorthThis)+'<span class="unit">円</span>';
   document.getElementById('netWorthWithNisa').innerHTML    = fmt(netWorthWithNisaThis)+'<span class="unit">円</span>';
   document.getElementById('formulaThis').style.whiteSpace  = 'pre';
   document.getElementById('formulaThis').textContent       = thisFormulaParts;
@@ -1304,19 +1306,19 @@ function renderAll() {
   document.getElementById('totalCreditThis').textContent   = fmt(totalCreditT)+' 円';
   document.getElementById('totalCreditNext').textContent   = fmt(totalCreditN)+' 円';
   document.getElementById('totalFixed').textContent        = fmt(totalFixed)+' 円';
-
+ 
   if (data.updatedAt) {
     const d=new Date(data.updatedAt);
     document.getElementById('lastUpdated').textContent =
       '最終更新 '+d.toLocaleDateString('ja-JP')+' '+d.toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
   }
 }
-
+ 
 document.getElementById('headerDate').textContent =
   new Date().toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric',weekday:'short'});
-
+ 
 let data = null;
-
+ 
 const memoArea=document.getElementById('memoArea');
 let memoTimer;
 memoArea.addEventListener('input',()=>{
@@ -1324,7 +1326,7 @@ memoArea.addEventListener('input',()=>{
   clearTimeout(memoTimer);
   memoTimer=setTimeout(()=>{ data.memo=memoArea.value; saveData(data); },800);
 });
-
+ 
 // ページ離脱・バックグラウンド移行時にも保存
 window.addEventListener('beforeunload', ()=>{
   if (data && currentStorageKey) { try { localStorage.setItem(currentStorageKey, JSON.stringify(data)); } catch(e){} }
@@ -1334,13 +1336,13 @@ document.addEventListener('visibilitychange', ()=>{
     try { localStorage.setItem(currentStorageKey, JSON.stringify(data)); } catch(e){}
   }
 });
-
+ 
 // localStorage が使えるか起動時チェック
 (function(){
   try { localStorage.setItem('__test__','1'); localStorage.removeItem('__test__'); }
   catch(e) { const w=document.getElementById('storage-warn'); if(w) w.style.display='block'; }
 })();
-
+ 
 // 起動
 initAuth();
 </script>
