@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="資産管理">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#f8f7f5">
+<title>資産管理</title>
+<style>
+  /* ── Auth screens ── */
+  #auth-screen {
+    position:fixed; inset:0; background:#f8f7f5; z-index:9999;
+    display:none; flex-direction:column; align-items:center; justify-content:center;
+    padding:32px 24px;
+  }
+  .auth-box {
+    background:#fff; border:1px solid #e0dbd4; padding:40px 32px 32px;
+    width:100%; max-width:360px; text-align:center;
+  }
+  .auth-icon { font-size:32px; margin-bottom:16px; }
+  .auth-title {
+    font-family:Tahoma,'MS PGothic','ＭＳ Ｐゴシック',sans-serif;
+    font-size:11px; letter-spacing:0.3em; text-transform:uppercase;
+    color:#8a7560; margin-bottom:24px;
+  }
+  .auth-input {
+    width:100%; border:1px solid #e0dbd4; background:#f8f7f5;
+    font-family:Tahoma,'MS PGothic','ＭＳ Ｐゴシック',sans-serif;
+    font-size:16px; padding:12px 14px; outline:none; border-radius:1px;
+    -webkit-appearance:none; margin-bottom:10px; transition:border-color 0.15s; text-align:left;
+  }
+  .auth-input:focus { border-color:#8a7560; }
+  .auth-input.error { border-color:#c0392b; animation:shake 0.3s ease; }
+  .auth-btn {
+    width:100%; background:#8a7560; color:#fff; border:none;
+    font-family:Tahoma,'MS PGothic','ＭＳ Ｐゴシック',sans-serif;
+    font-size:13px; letter-spacing:0.15em; text-transform:uppercase;
+    padding:14px; cursor:pointer; border-radius:1px;
+    -webkit-tap-highlight-color:transparent; min-height:44px;
+    transition:opacity 0.15s; margin-top:4px;
+  }
+  .auth-btn:hover { opacity:0.85; }
+  .auth-btn.secondary {
+    background:transparent; color:#8a7560; border:1px solid #e0dbd4;
+    margin-top:8px;
+  }
+  .auth-error { font-size:12px; color:#c0392b; margin-top:10px; min-height:18px; text-align:left; }
+  .auth-switch { font-size:11px; color:#9a9189; margin-top:16px; }
+  .auth-switch a { color:#8a7560; text-decoration:underline; cursor:pointer; }
+  @keyframes shake {
+    0%,100%{transform:translateX(0)}
+    25%{transform:translateX(-6px)}
+    75%{transform:translateX(6px)}
+  }
+  /* Admin panel */
+  .admin-panel {
+    background:#fff; border:1px solid #e0dbd4; padding:20px 24px; margin-bottom:20px;
+  }
+  .admin-panel-title { font-size:10px; letter-spacing:0.3em; text-transform:uppercase; color:#8a7560; margin-bottom:14px; }
+  .admin-user-row { display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid #e0dbd4; }
+  .admin-user-row:last-child { border-bottom:none; }
+  .admin-user-id { flex:1; font-size:12px; color:#1a1714; word-break:break-all; }
+  .admin-user-badge { font-size:9px; padding:2px 8px; border-radius:20px; letter-spacing:0.1em; }
+  .admin-user-badge.pending { background:#fff3cd; color:#7a5c00; border:1px solid #f0c040; }
+  .admin-user-badge.approved { background:#eef6f1; color:#2d7a52; border:1px solid rgba(45,122,82,0.3); }
+  .admin-user-badge.admin { background:rgba(138,117,96,0.1); color:#8a7560; border:1px solid rgba(138,117,96,0.3); }
+  .admin-btn { font-size:10px; padding:5px 10px; border-radius:1px; cursor:pointer; border:1px solid; min-height:32px; -webkit-tap-highlight-color:transparent; }
+  .admin-btn.approve { background:#eef6f1; color:#2d7a52; border-color:rgba(45,122,82,0.3); }
+  .admin-btn.reject { background:#fdf0ee; color:#c0392b; border-color:rgba(192,57,43,0.3); }
+  /* Logout btn */
+  .logout-btn {
+    font-size:10px; letter-spacing:0.1em; color:#9a9189; background:transparent;
+    border:1px solid #e0dbd4; padding:5px 12px; cursor:pointer; border-radius:20px;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .logout-btn:hover { color:#1a1714; border-color:#c8c0b5; }
+  .user-label { font-size:10px; color:#9a9189; margin-right:8px; }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f8f7f5;
+    --surface: #ffffff;
+    --surface2: #f2f0ed;
+    --border: #e0dbd4;
+    --border-strong: #c8c0b5;
+    --accent: #8a7560;
+    --accent-light: rgba(138,117,96,0.08);
+    --text: #1a1714;
+    --text-muted: #9a9189;
+    --text-mid: #6b6259;
+    --green: #2d7a52;
+    --green-bg: #eef6f1;
+    --red: #c0392b;
+    --red-bg: #fdf0ee;
+    --orange: #b85c00;
+    --orange-bg: #fdf3e8;
+  }
+  body { background:var(--bg); color:var(--text); font-family:Tahoma,'MS PGothic','ＭＳ Ｐゴシック',sans-serif; font-weight:400; min-height:100vh; padding:48px 24px; line-height:1.6; }
+  .container { max-width:940px; margin:0 auto; }
+
+  /* Header */
+  .header { display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:44px; padding-bottom:20px; border-bottom:1px solid var(--border); }
+  .header-title { font-family:Tahoma,'MS PGothic','ＭＳ Ｐゴシック',sans-serif; font-size:13px; font-weight:400; letter-spacing:0.35em; text-transform:uppercase; color:var(--accent); }
+  .header-date { font-size:11px; letter-spacing:0.12em; color:var(--text-muted); }
+
+  /* Net worth hero */
+  .net-worth-card { background:var(--surface); border:1px solid var(--border); border-radius:2px; padding:36px 40px 30px; margin-bottom:28px; position:relative; box-shadow:0 1px 4px rgba(0,0,0,0.04); }
+  .net-worth-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:var(--accent); border-radius:2px 2px 0 0; }
+  .net-worth-label { font-size:10px; letter-spacing:0.35em; text-transform:uppercase; color:var(--text-muted); margin-bottom:12px; }
+  .net-worth-amount { font-family:Tahoma,'MS PGothic','ＭＳ Ｐゴシック',sans-serif; font-size:52px; font-weight:300; color:var(--text); letter-spacing:-0.01em; line-height:1; margin-bottom:6px; }
+  .net-worth-amount .unit { font-size:20px; color:var(--text-muted); margin-left:4px; }
+  .net-worth-sub { font-size:11px; color:var(--text-muted); letter-spacing:0.06em; }
+
+  /* Summary bar */
+  .summary-bar { display:grid; gap:2px; margin-bottom:28px; }
+  .summary-item { background:var(--surface); padding:16px 18px; border:1px solid var(--border); }
+  .summary-label { font-size:9px; letter-spacing:0.25em; text-transform:uppercase; color:var(--text-muted); margin-bottom:5px; }
+  .summary-value { font-family:Tahoma,'MS PGothic','ＭＳ Ｐゴシック',sans-serif; font-size:20px; font-weight:400; color:var(--text); }
+  .summary-value.negative { color:var(--red); }
+  .summary-value.green { color:var(--green); }
+  .summary-value.orange { color:var(--orange); }
+
+  /* Section */
+  .section { margin-bottom:28px; }
+  .section-header { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+  .section-title { font-size:10px; letter-spacing:0.35em; text-transform:uppercase; color:var(--accent); font-weight:400; white-space:nowrap; }
+  .section-line { flex:1; height:1px; background:var(--border); }
+
+  /* Cards grid */
+  .cards-grid { display:grid; gap:2px; }
+  .cards-grid.cols-2 { grid-template-columns:repeat(2,1fr); }
+  .cards-grid.cols-3 { grid-template-columns:repeat(3,1fr); }
+
+  /* Base card */
+  .card { background:var(--surface); border:1px solid var(--border); padding:20px; transition:border-color 0.15s,box-shadow 0.15s; cursor:pointer; position:relative; -webkit-tap-highlight-color:transparent; }
+  .card:hover { border-color:var(--border-strong); box-shadow:0 1px 6px rgba(0,0,0,0.06); }
+  .card.editing { border-color:var(--accent); box-shadow:0 0 0 2px var(--accent-light); cursor:default; }
+  .edit-hint { position:absolute; top:9px; right:11px; font-size:9px; letter-spacing:0.15em; color:var(--text-muted); opacity:0; transition:opacity 0.15s; text-transform:uppercase; }
+  .card:hover:not(.editing) .edit-hint { opacity:1; }
+
+  .card-icon { font-size:14px; margin-bottom:8px; opacity:0.5; }
+  .card-name { font-size:11px; color:var(--text-muted); letter-spacing:0.06em; margin-bottom:5px; }
+  .card-value { font-family:Tahoma,'MS PGothic','ＭＳ Ｐゴシック',sans-serif; font-size:26px; font-weight:400; color:var(--text); line-height:1; margin-bottom:2px; }
+  .card-value.negative { color:var(--red); }
+  .card-sub { font-size:10px; color:var(--text-muted); }
+
+  /* Edit mode */
+  .card-edit { display:none; flex-direction:column; gap:7px; }
+  .card.editing .card-display { display:none; }
+  .card.editing .card-edit { display:flex; }
+
+  .edit-label { font-size:9px; letter-spacing:0.2em; color:var(--text-muted); text-transform:uppercase; margin-bottom:1px; }
+  .edit-sublabel { font-size:11px; color:var(--text-muted); margin-bottom:3px; }
+  .edit-name-input {
+    background:var(--bg); border:1px solid var(--border); color:var(--text);
+    font-family:Tahoma,'MS PGothic','ＭＳ Ｐゴシック',sans-serif; font-size:16px; padding:9px 10px;
+    width:100%; outline:none; border-radius:1px; margin-bottom:2px;
+    -webkit-appearance:none; appearance:none;
+  }
+  .edit-name-input:focus { border-color:var(--accent); }
+  .edit-input {
+    background:var(--bg); border:1px solid var(--border); color:var(--text);
+    font-family:Tahoma,'MS PGothic','ＭＳ Ｐゴシック',sans-serif; font-size:20px; padding:9px 10px;
+    width:100%; outline:none; border-radius:1px; transition:border-color 0.15s;
+    -webkit-appearance:none; appearance:none;
+  }
+  .edit-input:focus { border-color:var(--accent); }
+  .edit-note {
+    background:var(--bg); border:1px solid var(--border); color:var(--text-mid);
+    font-family:Tahoma,'MS PGothic','ＭＳ Ｐゴシック',sans-serif; font-size:16px; padding:9px 10px;
+    width:100%; outline:none; resize:none; height:48px; border-radius:1px;
+    -webkit-appearance:none; appearance:none;
+  }
+  .edit-note:focus { border-color:var(--accent); }
+  .btn-save { background:var(--accent); color:#fff; border:none; font-family:Tahoma,'MS PGothic','ＭＳ Ｐゴシック',sans-serif; font-size:13px; letter-spacing:0.1em; text-transform:uppercase; padding:12px 18px; cursor:pointer; border-radius:1px; font-weight:400; transition:opacity 0.15s; -webkit-tap-highlight-color:transparent; min-height:44px; }
+  .btn-save:hover { opacity:0.85; }
+  .btn-cancel { background:transparent; color:var(--text-muted); border:1px solid var(--border); font-family:Tahoma,'MS PGothic','ＭＳ Ｐゴシック',sans-serif; font-size:13px; letter-spacing:0.1em; text-transform:uppercase; padding:12px 14px; cursor:pointer; border-radius:1px; -webkit-tap-highlight-color:transparent; min-height:44px; }
+  .btn-cancel:hover { color:var(--text); border-color:var(--border-strong); }
+  .btn-row { display:flex; gap:8px; }
+  .edit-month-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .edit-month-col { display:flex; flex-direction:column; gap:3px; }
+
+  /* Credit 2-month display */
+  .credit-months { display:flex; gap:10px; margin-top:4px; }
+  .credit-month-block { flex:1; }
+  .credit-month-tag { font-size:9px; letter-spacing:0.15em; text-transform:uppercase; color:var(--text-muted); margin-bottom:3px; }
+  .credit-month-val { font-family:Tahoma,'MS PGothic','ＭＳ Ｐゴシック',sans-serif; font-size:19px; color:var(--red); line-height:1; }
+  .credit-divider { width:1px; background:var(--border); align-self:stretch; }
+
+  /* Fixed costs */
+  .fixed-card { background:var(--surface); border:1px solid var(--border); padding:20px 22px; cursor:pointer; transition:border-color 0.15s,box-shadow 0.15s; position:relative; }
+  .fixed-card:hover { border-color:var(--border-strong); box-shadow:0 1px 6px rgba(0,0,0,0.06); }
+  .fixed-card.editing { border-color:var(--accent); box-shadow:0 0 0 2px var(--accent-light); cursor:default; }
+  .fixed-card .edit-hint { position:absolute; top:9px; right:11px; font-size:9px; letter-spacing:0.15em; color:var(--text-muted); opacity:0; transition:opacity 0.15s; text-transform:uppercase; }
+  .fixed-card:hover:not(.editing) .edit-hint { opacity:1; }
+  .fixed-card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+  .debit-badge { display:inline-flex; align-items:center; gap:4px; font-size:9px; letter-spacing:0.08em; padding:3px 9px; border-radius:20px; }
+  .debit-badge.upcoming { color:var(--orange); background:var(--orange-bg); border:1px solid rgba(184,92,0,0.2); }
+  .debit-badge.done { color:var(--text-muted); background:var(--surface2); border:1px solid var(--border); }  .fixed-card-title { font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:var(--text-muted); }
+  .fixed-item { display:flex; justify-content:space-between; align-items:baseline; padding:8px 0; border-bottom:1px solid var(--border); }
+  .fixed-item:last-child { border-bottom:none; }
+  .fixed-item-name { font-size:11px; color:var(--text-mid); }
+  .fixed-item-val { font-family:Tahoma,'MS PGothic','ＭＳ Ｐゴシック',sans-serif; font-size:19px; color:var(--orange); }
+  .fixed-total-row { display:flex; justify-content:space-between; align-items:baseline; padding-top:12px; margin-top:4px; border-top:1px solid var(--border-strong); }
+  .fixed-total-label { font-size:9px; letter-spacing:0.2em; text-transform:uppercase; color:var(--text-muted); }
+  .fixed-total-val { font-family:Tahoma,'MS PGothic','ＭＳ Ｐゴシック',sans-serif; font-size:24px; color:var(--orange); }
+  .fixed-edit { display:none; flex-direction:column; gap:8px; }
+  .fixed-card.editing .fixed-display { display:none; }
+  .fixed-card.editing .fixed-edit { display:flex; }
+  .fixed-edit-grid { display:grid; gap:7px; }
+  .fixed-edit-row { display:grid; grid-template-columns:1fr 1fr; gap:7px; align-items:end; }
+  .fixed-edit-name { background:var(--bg); border:1px solid var(--border); color:var(--text-mid); font-family:Tahoma,'MS PGothic','ＭＳ Ｐゴシック',sans-serif; font-size:16px; padding:9px 10px; width:100%; outline:none; border-radius:1px; -webkit-appearance:none; }
+  .fixed-edit-name:focus { border-color:var(--accent); }
+
+  /* Salary card */
+  .salary-card { background:var(--surface); border:1px solid var(--border); padding:20px 22px; cursor:pointer; transition:border-color 0.15s,box-shadow 0.15s; position:relative; }
+  .salary-card:hover { border-color:var(--border-strong); box-shadow:0 1px 6px rgba(0,0,0,0.06); }
+  .salary-card.editing { border-color:var(--accent); box-shadow:0 0 0 2px var(--accent-light); cursor:default; }
+  .salary-card .edit-hint { position:absolute; top:9px; right:11px; font-size:9px; letter-spacing:0.15em; color:var(--text-muted); opacity:0; transition:opacity 0.15s; text-transform:uppercase; }
+  .salary-card:hover:not(.editing) .edit-hint { opacity:1; }
+  .salary-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px; }
+  .salary-header-left { display:flex; flex-direction:column; gap:5px; }
+  .salary-card-title { font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:var(--text-muted); }
+  .salary-payday-badge { display:inline-flex; align-items:center; gap:5px; font-size:9px; letter-spacing:0.08em; color:var(--accent); background:var(--accent-light); border:1px solid rgba(138,117,96,0.2); padding:3px 9px; border-radius:20px; }
+  .salary-payday-badge.paid { color:var(--text-muted); background:var(--bg); border-color:var(--border); }
+  .salary-months { display:grid; grid-template-columns:1fr 1fr; gap:2px; }
+  .salary-month-block { padding:12px 14px; background:var(--bg); border:1px solid var(--border); }
+  .salary-month-block.this-month { border-color:rgba(45,122,82,0.3); background:var(--green-bg); }
+  .salary-month-block.paid-out { opacity:0.5; }
+  .salary-month-tag { font-size:9px; letter-spacing:0.15em; text-transform:uppercase; color:var(--text-muted); margin-bottom:4px; }
+  .salary-month-val { font-family:Tahoma,'MS PGothic','ＭＳ Ｐゴシック',sans-serif; font-size:22px; color:var(--green); line-height:1; }
+  .salary-month-val.zeroed { color:var(--text-muted); font-size:15px; font-family:Tahoma,'MS PGothic','ＭＳ Ｐゴシック',sans-serif; }
+  .salary-zero-note { font-size:9px; color:var(--text-muted); margin-top:3px; }
+  .salary-edit { display:none; flex-direction:column; gap:8px; }
+  .salary-card.editing .salary-display { display:none; }
+  .salary-card.editing .salary-edit { display:flex; }
+
+  /* NISA */
+  .nisa-bar-wrap { margin-top:9px; }
+  .nisa-bar-bg { height:2px; background:var(--border); border-radius:2px; overflow:hidden; }
+  .nisa-bar-fill { height:100%; border-radius:2px; transition:width 0.4s ease; }
+  .nisa-bar-fill-principal { background:var(--accent); display:inline-block; height:100%; }
+  .nisa-bar-fill-profit { background:var(--green); display:inline-block; height:100%; }
+  .nisa-bar-label { display:flex; justify-content:space-between; font-size:9px; color:var(--text-muted); margin-top:4px; }
+  .nisa-breakdown { display:flex; gap:10px; margin-top:8px; }
+  .nisa-breakdown-item { flex:1; }
+  .nisa-breakdown-label { font-size:9px; color:var(--text-muted); letter-spacing:0.1em; margin-bottom:2px; }
+  .nisa-breakdown-val { font-size:13px; color:var(--text); }
+  .nisa-breakdown-val.profit-val { color:var(--green); }
+  .nisa-breakdown-divider { width:1px; background:var(--border); align-self:stretch; }
+  /* Stock card */
+  .stock-row { display:grid; grid-template-columns:1fr 1fr 1fr; gap:2px; margin-top:8px; }
+  .stock-cell { background:var(--bg); border:1px solid var(--border); padding:7px 10px; }
+  .stock-cell-label { font-size:9px; color:var(--text-muted); letter-spacing:0.1em; margin-bottom:3px; }
+  .stock-cell-val { font-size:14px; color:var(--text); }
+  .stock-pnl { margin-top:6px; display:flex; align-items:baseline; gap:8px; }
+  .stock-pnl-label { font-size:9px; color:var(--text-muted); letter-spacing:0.1em; }
+  .stock-pnl-val { font-size:15px; font-weight:400; }
+  .stock-pnl-val.gain { color:var(--green); }
+  .stock-pnl-val.loss { color:var(--red); }
+
+  /* Memo */
+  .memo-card { background:var(--surface); border:1px solid var(--border); padding:20px 22px; margin-top:28px; }
+  .memo-textarea { background:transparent; border:none; border-top:1px solid var(--border); color:var(--text-mid); font-family:Tahoma,'MS PGothic','ＭＳ Ｐゴシック',sans-serif; font-size:16px; line-height:1.8; padding:12px 0 0; width:100%; outline:none; resize:none; min-height:64px; margin-top:12px; -webkit-appearance:none; }
+  .add-item-btn {
+    font-size:10px; letter-spacing:0.1em; color:var(--accent);
+    background:transparent; border:1px solid rgba(138,117,96,0.3);
+    padding:4px 10px; cursor:pointer; border-radius:20px; white-space:nowrap;
+    -webkit-tap-highlight-color:transparent; transition:background 0.15s;
+  }
+  .add-item-btn:hover { background:var(--accent-light); }
+  .delete-btn {
+    position:absolute; top:8px; right:36px;
+    font-size:10px; color:var(--text-muted); background:transparent;
+    border:1px solid var(--border); padding:3px 7px; cursor:pointer;
+    border-radius:3px; opacity:0; transition:opacity 0.15s;
+    -webkit-tap-highlight-color:transparent; z-index:1;
+  }
+  .card:hover .delete-btn { opacity:1; }
+  .delete-btn:hover { color:var(--red); border-color:var(--red); }
+  .last-updated { text-align:right; font-size:10px; color:var(--text-muted); letter-spacing:0.08em; margin-top:36px; padding-top:16px; border-top:1px solid var(--border); }
+
+  @media (max-width:640px) {
+    body { padding:16px 12px; padding-bottom:calc(16px + env(safe-area-inset-bottom)); }
+    .net-worth-amount { font-size:32px; }
+    .summary-bar { grid-template-columns:repeat(2,1fr) !important; }
+    .cards-grid.cols-2,.cards-grid.cols-3 { grid-template-columns:1fr; }
+    .net-worth-card { padding:20px 16px; }
+    .net-worth-card > div[style*="grid"] { grid-template-columns:1fr !important; gap:16px !important; }
+    .net-worth-card > div[style*="grid"] > div[style*="border-right"] { border-right:none !important; border-bottom:1px solid var(--border); padding-right:0 !important; padding-bottom:16px; }
+    .net-worth-card > div[style*="grid"] > div[style*="padding-left"] { padding-left:0 !important; }
+    .edit-month-row,.fixed-edit-row { grid-template-columns:1fr; }
+    .card { padding:16px; }
+    .section-title { font-size:9px; }
+    .btn-save,.btn-cancel { padding:13px 16px; font-size:12px; }
+    .summary-item { padding:14px 14px; }
+    .header { margin-bottom:28px; }
+  }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+  .container > * { animation:fadeUp 0.4s ease both; }
+  .container > *:nth-child(1){animation-delay:0.04s}
+  .container > *:nth-child(2){animation-delay:0.09s}
+  .container > *:nth-child(3){animation-delay:0.14s}
+  .container > *:nth-child(4){animation-delay:0.19s}
+  .container > *:nth-child(5){animation-delay:0.24s}
+  .container > *:nth-child(6){animation-delay:0.29s}
+  .container > *:nth-child(7){animation-delay:0.34s}
+  .container > *:nth-child(8){animation-delay:0.39s}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- 認証画面 -->
+  <div id="auth-screen">
+    <div class="auth-box">
+      <div class="auth-icon" id="auth-icon">🔒</div>
+      <div class="auth-title" id="auth-title">資産管理 / Finance</div>
+      <form id="auth-form" action="#" method="post" autocomplete="on">
+        <input id="auth-id" class="auth-input" type="email" inputmode="email"
+               name="username" placeholder="User ID" maxlength="100"
+               autocomplete="username">
+        <input id="auth-pw" class="auth-input" type="password" inputmode="text"
+               name="password" placeholder="Password" maxlength="100"
+               autocomplete="current-password">
+        <button type="submit" class="auth-btn" id="auth-btn">ログイン</button>
+      </form>
+      <div class="auth-error" id="auth-error"></div>
+    </div>
+  </div>
+
+  <div id="app-content" style="display:none">
+
+  <div id="storage-warn" style="display:none;background:#fff3cd;border:1px solid #f0c040;color:#7a5c00;font-size:13px;padding:12px 16px;margin-bottom:16px;border-radius:2px;line-height:1.5">
+    ⚠️ データの保存ができません。Safariの「プライベートブラウズ」モードではデータが保存されません。通常モードでご利用ください。
+  </div>
+
+  <div class="header">
+    <div class="header-title">Personal Finance</div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <div class="header-date" id="headerDate"></div>
+      <button class="logout-btn" onclick="logout()">ログアウト</button>
+    </div>
+  </div>
+
+  <div class="net-worth-card">
+    <div class="net-worth-label">純資産 / Net Worth</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;margin-bottom:10px">
+      <div style="padding-right:24px;border-right:1px solid var(--border)">
+        <div style="font-size:9px;letter-spacing:0.25em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px">NISA除く（銀行ベース）</div>
+        <div class="net-worth-amount" id="netWorthDisplay">—<span class="unit">円</span></div>
+        <div style="font-size:9px;color:var(--text-muted);margin-top:6px;line-height:1.6" id="formulaThis"></div>
+      </div>
+      <div style="padding-left:24px">
+        <div style="font-size:9px;letter-spacing:0.25em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px">運用込み（銀行＋持株＋NISA）</div>
+        <div class="net-worth-amount" id="netWorthWithNisa" style="color:var(--accent)">—<span class="unit">円</span></div>
+        <div style="font-size:9px;color:var(--text-muted);margin-top:6px;line-height:1.6" id="formulaWithNisa"></div>
+      </div>
+    </div>
+    <div class="net-worth-sub">銀行残高 ＋ 給与 − CC − 固定費　／　毎月25日（前営業日）にメイン口座を自動更新</div>
+  </div>
+
+  <div class="summary-bar" style="grid-template-columns:repeat(7,1fr)">
+    <div class="summary-item">
+      <div class="summary-label">総資産（銀行）</div>
+      <div class="summary-value" id="totalAssetsGross">—</div>
+    </div>
+    <div class="summary-item">
+      <div class="summary-label">運用合計</div>
+      <div class="summary-value" id="totalInvestments">—</div>
+    </div>
+    <div class="summary-item" style="border-left:2px solid var(--accent)">
+      <div class="summary-label">純資産 今月</div>
+      <div class="summary-value" id="totalAssetsThis">—</div>
+      <div style="font-size:9px;color:var(--text-muted);margin-top:4px;line-height:1.5" id="formulaSummaryThis"></div>
+    </div>
+    <div class="summary-item">
+      <div class="summary-label">純資産 来月</div>
+      <div class="summary-value" id="totalAssetsNext">—</div>
+      <div style="font-size:9px;color:var(--text-muted);margin-top:4px;line-height:1.5" id="formulaSummaryNext"></div>
+    </div>
+    <div class="summary-item">
+      <div class="summary-label">給与 今月</div>
+      <div class="summary-value green" id="totalSalaryThis">—</div>
+    </div>
+    <div class="summary-item">
+      <div class="summary-label">CC 今月</div>
+      <div class="summary-value negative" id="totalCreditThis">—</div>
+    </div>
+    <div class="summary-item">
+      <div class="summary-label">CC 来月</div>
+      <div class="summary-value negative" id="totalCreditNext">—</div>
+    </div>
+    <div class="summary-item">
+      <div class="summary-label">固定費 月額</div>
+      <div class="summary-value orange" id="totalFixed">—</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">銀行口座</div>
+      <div class="section-line"></div>
+      <button class="add-item-btn" onclick="addBank()">＋ 追加</button>
+    </div>
+    <div class="cards-grid cols-3" id="bankGrid"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">クレジットカード</div>
+      <div class="section-line"></div>
+      <button class="add-item-btn" onclick="addCredit()">＋ 追加</button>
+    </div>
+    <div class="cards-grid cols-3" id="creditGrid"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">固定費 / 口座引落</div>
+      <div class="section-line"></div>
+      <button class="add-item-btn" onclick="addFixed()">＋ 追加</button>
+    </div>
+    <div id="fixedCard"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header"><div class="section-title">給与 / 入金予定</div><div class="section-line"></div></div>
+    <div id="salaryCard"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header"><div class="section-title">投資・貯蓄</div><div class="section-line"></div></div>
+    <div class="cards-grid cols-2" id="investGrid"></div>
+  </div>
+
+  <div class="memo-card">
+    <div class="section-title" style="margin-bottom:0">メモ</div>
+    <textarea class="memo-textarea" id="memoArea" placeholder="気になること、今月の振り返り、目標など…" rows="3"></textarea>
+  </div>
+
+  <div class="last-updated" id="lastUpdated"></div>
+
+  </div><!-- /app-content -->
+</div>
+
+<script>
+
+// ══════════════════════════════════════════════
+//  Auth（固定ID・PW）
+// ══════════════════════════════════════════════
+const FIXED_ID_HASH = '10818c4831ebe84d39a6d4dd2c9a25900d324f2972e037f8d17aaff0b9ffd5d8';
+const FIXED_PW_HASH = '436971326e06501c6daabd06f1a2b2c0831ee1a87dae93817818bfc965d6fa50';
+const SESSION_KEY   = 'mizo_session';
+const SESSION_TTL   = 60 * 60 * 1000; // 60分
+
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+function getSession() {
+  try { return JSON.parse(localStorage.getItem(SESSION_KEY)||'null'); } catch(e){ return null; }
+}
+function saveSession() { localStorage.setItem(SESSION_KEY, JSON.stringify({ts:Date.now()})); }
+function clearSession() { localStorage.removeItem(SESSION_KEY); }
+function isSessionValid() {
+  const s = getSession();
+  if (!s) return false;
+  return (Date.now() - s.ts) < SESSION_TTL;
+}
+function touchSession() { saveSession(); }
+
+function renderAuthScreen() {
+  document.getElementById('auth-screen').style.display='flex';
+  document.getElementById('app-content').style.display='none';
+  document.getElementById('auth-error').textContent='';
+  document.getElementById('auth-id').value='';
+  document.getElementById('auth-pw').value='';
+  setTimeout(()=>document.getElementById('auth-id').focus(), 100);
+}
+
+async function handleAuth(e) {
+  if (e) e.preventDefault();
+  const id  = document.getElementById('auth-id').value.trim();
+  const pw  = document.getElementById('auth-pw').value;
+  const err = document.getElementById('auth-error');
+  if (!id || !pw) { err.textContent='IDとパスワードを入力してください'; return; }
+  const idHash = await sha256(id);
+  const pwHash = await sha256(pw);
+  if (idHash === FIXED_ID_HASH && pwHash === FIXED_PW_HASH) {
+    saveSession();
+    document.getElementById('auth-screen').style.display='none';
+    unlockApp();
+  } else {
+    err.textContent='IDまたはパスワードが違います';
+    ['auth-id','auth-pw'].forEach(k=>{
+      const el=document.getElementById(k);
+      el.classList.add('error');
+      setTimeout(()=>el.classList.remove('error'),400);
+    });
+    document.getElementById('auth-pw').value='';
+  }
+}
+
+function unlockApp() {
+  currentStorageKey = STORAGE_KEY;
+  data = loadUserData();
+  document.getElementById('app-content').style.display='block';
+  const memoArea = document.getElementById('memoArea');
+  if (memoArea) memoArea.value = data.memo||'';
+  ['click','touchstart','keydown'].forEach(ev=>{
+    document.addEventListener(ev, touchSession, {passive:true});
+  });
+  renderAll();
+}
+
+function logout() {
+  clearSession();
+  data = null;
+  currentStorageKey = null;
+  document.getElementById('app-content').style.display='none';
+  renderAuthScreen();
+}
+
+async function initAuth() {
+  if (isSessionValid()) { touchSession(); unlockApp(); return; }
+  clearSession();
+  renderAuthScreen();
+}
+
+document.getElementById('auth-form').addEventListener('submit', handleAuth);
+
+// ══════════════════════════════════════════════
+//  Data & Storage
+// ══════════════════════════════════════════════
+const STORAGE_KEY = 'mizo_finance_v3'; // fallback only
+let currentStorageKey = null;
+
+function loadUserData() {
+  const key = currentStorageKey || STORAGE_KEY;
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return JSON.parse(JSON.stringify(DEFAULT_DATA));
+    const saved = JSON.parse(raw);
+    const d = JSON.parse(JSON.stringify(DEFAULT_DATA));
+    // 動的に追加・削除された項目も含めてそのまま復元
+    if (saved.banks)   d.banks   = saved.banks;
+    if (saved.credits) d.credits = saved.credits;
+    if (saved.fixed)   d.fixed   = saved.fixed;
+    if (saved.invests) saved.invests.forEach((s,i)=>{
+      if (!d.invests[i]) return;
+      Object.assign(d.invests[i], s);
+      if (d.invests[i].nisaType && s.principal != null && s.total == null) {
+        d.invests[i].total=(s.principal||0)+(s.profit||0); d.invests[i].profit=s.profit||0;
+      }
+      if (d.invests[i].nisaType && s.value != null && s.total == null) {
+        d.invests[i].total=s.value; d.invests[i].profit=0;
+      }
+      if (d.invests[i].stockType) {
+        d.invests[i].avgPrice=s.avgPrice||0;
+        d.invests[i].shares=s.shares||0;
+        d.invests[i].currentPrice=s.currentPrice||0;
+      }
+    });
+    if (saved.salary)  Object.assign(d.salary, saved.salary);
+    d.salaryAutoResetMonth  = saved.salaryAutoResetMonth||null;
+    d.debitAutoProcessMonth = saved.debitAutoProcessMonth||null;
+    d.amexAutoProcessMonth  = saved.amexAutoProcessMonth||null;
+    d.creditShiftMonth      = saved.creditShiftMonth||null;
+    d.memo = saved.memo||''; d.updatedAt = saved.updatedAt||null;
+
+    const now=new Date(), thisY=now.getFullYear(), thisM=now.getMonth();
+    const monthRk=thisY+'-'+thisM;
+
+    if (d.creditShiftMonth !== monthRk) {
+      d.salary.thisMonth=d.salary.nextMonth; d.salary.nextMonth=0;
+      d.credits.forEach(c=>{ if(!isAmex(c.name)){ c.thisMonth=c.nextMonth; c.nextMonth=0; } });
+      d.creditShiftMonth=monthRk;
+      try { localStorage.setItem(key, JSON.stringify(d)); } catch(e){}
+    }
+    if (isPaydayPast(thisY,thisM) && d.salaryAutoResetMonth !== monthRk) {
+      d.salary.thisMonth=0; d.salaryAutoResetMonth=monthRk;
+      try { localStorage.setItem(key, JSON.stringify(d)); } catch(e){}
+    }
+    if (isDebitDayPast(thisY,thisM) && d.debitAutoProcessMonth !== monthRk) {
+      const totalCC=d.credits.reduce((s,c)=>isAmex(c.name)?s:s+c.thisMonth,0);
+      const totalFixed=d.fixed.reduce((s,f)=>s+f.value,0);
+      d.banks[0].value=Math.max(0,d.banks[0].value-totalCC-totalFixed);
+      d.debitAutoProcessMonth=monthRk;
+      try { localStorage.setItem(key, JSON.stringify(d)); } catch(e){}
+    }
+    const amexDebitDate=calcAmexDebitDay(thisY,thisM);
+    const amexRk=amexDebitDate.getFullYear()+'-'+amexDebitDate.getMonth();
+    if (isAmexDebitDayPast(thisY,thisM) && d.amexAutoProcessMonth !== amexRk) {
+      d.credits.forEach(c=>{
+        if (isAmex(c.name)) {
+          d.banks[0].value=Math.max(0,d.banks[0].value-c.thisMonth);
+          c.thisMonth=c.nextMonth; c.nextMonth=0;
+        }
+      });
+      d.amexAutoProcessMonth=amexRk;
+      try { localStorage.setItem(key, JSON.stringify(d)); } catch(e){}
+    }
+    return d;
+  } catch(e) { return JSON.parse(JSON.stringify(DEFAULT_DATA)); }
+}
+
+function isJPHoliday(date) {
+  const m = date.getMonth()+1, d = date.getDate();
+  const fixed = [[1,1],[1,2],[1,3],[2,11],[2,23],[3,20],[4,29],[5,3],[5,4],[5,5],[7,15],[8,11],[9,21],[10,14],[11,3],[11,23]];
+  return fixed.some(([fm,fd])=>fm===m&&fd===d);
+}
+function calcPayday(year, month) {
+  let d = new Date(year, month, 20);
+  while (d.getDay()===0 || d.getDay()===6 || isJPHoliday(d)) d.setDate(d.getDate()-1);
+  return d;
+}
+function paydayLabel(year, month) { return calcPayday(year,month).getDate()+'日'; }
+function isPaydayPast(year, month) {
+  const pd = calcPayday(year, month);
+  pd.setHours(23,59,59,999);
+  return new Date() > pd;
+}
+// 引落日: 毎月25日、土日祝なら前営業日
+function calcDebitDay(year, month) {
+  let d = new Date(year, month, 25);
+  while (d.getDay()===0 || d.getDay()===6 || isJPHoliday(d)) d.setDate(d.getDate()-1);
+  return d;
+}
+function debitDayLabel(year, month) { return calcDebitDay(year,month).getDate()+'日'; }
+function isDebitDayPast(year, month) {
+  const dd = calcDebitDay(year, month);
+  dd.setHours(23,59,59,999);
+  return new Date() > dd;
+}
+// アメックス引落日: 翌月10日、土日祝なら前営業日
+function calcAmexDebitDay(year, month) {
+  // 翌月の10日
+  const nextM = month === 11 ? 0 : month + 1;
+  const nextY = month === 11 ? year + 1 : year;
+  let d = new Date(nextY, nextM, 10);
+  while (d.getDay()===0 || d.getDay()===6 || isJPHoliday(d)) d.setDate(d.getDate()-1);
+  return d;
+}
+function amexDebitDayLabel(year, month) {
+  const dd = calcAmexDebitDay(year, month);
+  const m = dd.getMonth()+1;
+  return m+'月'+dd.getDate()+'日';
+}
+function isAmexDebitDayPast(year, month) {
+  const dd = calcAmexDebitDay(year, month);
+  dd.setHours(23,59,59,999);
+  return new Date() > dd;
+}
+// アメックスゴールドプリファード判定
+function isAmex(name) {
+  return name.replace(/\s/g,'').toLowerCase().includes('アメックスゴールドプリファード');
+}
+function monthLabel(offset) {
+  const d = new Date(); d.setMonth(d.getMonth()+offset);
+  return (d.getMonth()+1)+'月';
+}
+
+const DEFAULT_DATA = {
+  banks: [
+    {id:'b1',icon:'🏦',name:'メインバンク',value:0,note:''},
+    {id:'b2',icon:'🏦',name:'サブバンク',value:0,note:''},
+    {id:'b3',icon:'🏦',name:'給与口座',value:0,note:''},
+    {id:'b4',icon:'🏦',name:'口座④',value:0,note:''},
+    {id:'b5',icon:'🏦',name:'口座⑤',value:0,note:''},
+    {id:'b6',icon:'🏦',name:'口座⑥',value:0,note:''},
+  ],
+  credits: [
+    {id:'c1',icon:'💳',name:'カード①',thisMonth:0,nextMonth:0,note:''},
+    {id:'c2',icon:'💳',name:'カード②',thisMonth:0,nextMonth:0,note:''},
+    {id:'c3',icon:'💳',name:'カード③',thisMonth:0,nextMonth:0,note:''},
+    {id:'c4',icon:'💳',name:'カード④',thisMonth:0,nextMonth:0,note:''},
+    {id:'c5',icon:'💳',name:'カード⑤',thisMonth:0,nextMonth:0,note:''},
+    {id:'c6',icon:'💳',name:'カード⑥',thisMonth:0,nextMonth:0,note:''},
+  ],
+  fixed: [
+    {id:'f1',name:'家賃',value:0},
+    {id:'f2',name:'住宅ローン',value:0},
+    {id:'f3',name:'自動車ローン',value:0},
+    {id:'f4',name:'その他ローン',value:0},
+  ],
+  invests: [
+    {id:'i1',icon:'📈',name:'NISA（つみたて）',total:0,profit:0,note:'',nisaType:true},
+    {id:'i2',icon:'📈',name:'NISA（成長投資）',total:0,profit:0,note:'',nisaType:true},
+    {id:'i3',icon:'🏢',name:'持株',avgPrice:0,shares:0,currentPrice:0,note:'',stockType:true},
+    {id:'i4',icon:'💰',name:'その他投資',value:0,note:''},
+  ],
+  salary:{thisMonth:0,nextMonth:0,note:''},
+  salaryAutoResetMonth:null,
+  debitAutoProcessMonth:null,
+  amexAutoProcessMonth:null,
+  creditShiftMonth:null,
+  memo:'', updatedAt:null
+};
+
+function saveData(d) {
+  const key = currentStorageKey || STORAGE_KEY;
+  d.updatedAt = new Date().toISOString();
+  try {
+    localStorage.setItem(key, JSON.stringify(d));
+  } catch(e) {
+    console.warn('localStorage save failed:', e);
+    const warn = document.getElementById('storage-warn');
+    if (warn) { warn.style.display='block'; }
+  }
+  const ts = new Date(d.updatedAt);
+  const el = document.getElementById('lastUpdated');
+  if (el) el.textContent = '最終更新 '+ts.toLocaleDateString('ja-JP')+' '+ts.toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
+}
+
+function fmt(n) {
+  if (!n || isNaN(n)) return '0';
+  const abs=Math.abs(n);
+  const sign = n < 0 ? '▲' : '';
+  if (abs>=100000000) return sign+(abs/100000000).toFixed(2)+'億';
+  if (abs>=10000) return sign+(abs/10000).toFixed(1)+'万';
+  return sign+abs.toLocaleString('ja-JP');
+}
+
+// ── NISA card (total + profit → principal auto-calc) ──
+const NISA_TOTAL_LIMIT = 24000000;
+
+function renderNisaCard(item, idx) {
+  const card = document.createElement('div');
+  card.className = 'card';
+  const total     = item.total||0;
+  const profit    = item.profit||0;
+  const principal = Math.max(0, total - profit); // 自動計算
+
+  // 全NISAの元本合計（枠利用率用）
+  const allNisa        = data.invests.filter(v=>v.nisaType);
+  const totalPrincipal = allNisa.reduce((s,v)=>s+Math.max(0,(v.total||0)-(v.profit||0)),0);
+  const totalProfit    = allNisa.reduce((s,v)=>s+(v.profit||0),0);
+  const pctPrincipal   = Math.min(100, (totalPrincipal / NISA_TOTAL_LIMIT) * 100);
+  const pctProfit      = Math.min(100 - pctPrincipal, (totalProfit / NISA_TOTAL_LIMIT) * 100);
+  const profitRate     = principal > 0 ? ((profit / principal) * 100).toFixed(1) : null;
+
+  card.innerHTML =
+    '<div class="edit-hint">編集</div>'+
+    '<div class="card-display">'+
+      '<div class="card-icon">'+item.icon+'</div>'+
+      '<div class="card-name">'+item.name+'</div>'+
+      '<div class="card-value">'+fmt(total)+'<span style="font-size:13px;color:var(--text-muted);margin-left:2px">円</span></div>'+
+      '<div class="nisa-breakdown">'+
+        '<div class="nisa-breakdown-item">'+
+          '<div class="nisa-breakdown-label">元本（自動）</div>'+
+          '<div class="nisa-breakdown-val">'+fmt(principal)+' 円</div>'+
+        '</div>'+
+        '<div class="nisa-breakdown-divider"></div>'+
+        '<div class="nisa-breakdown-item">'+
+          '<div class="nisa-breakdown-label">利益'+(profitRate!==null?' ('+profitRate+'%)':'')+'</div>'+
+          '<div class="nisa-breakdown-val profit-val">'+fmt(profit)+' 円</div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="nisa-bar-wrap">'+
+        '<div class="nisa-bar-bg">'+
+          '<div style="height:100%;display:flex">'+
+            '<div class="nisa-bar-fill-principal" style="width:'+pctPrincipal+'%"></div>'+
+            '<div class="nisa-bar-fill-profit" style="width:'+pctProfit+'%"></div>'+
+          '</div>'+
+        '</div>'+
+        '<div class="nisa-bar-label">'+
+          '<span>元本枠利用 '+pctPrincipal.toFixed(1)+'%（合算）</span>'+
+          '<span>上限 '+fmt(NISA_TOTAL_LIMIT)+'</span>'+
+        '</div>'+
+      '</div>'+
+      (item.note?'<div class="card-sub" style="margin-top:4px;font-style:italic">'+item.note+'</div>':'')+
+    '</div>'+
+    '<div class="card-edit">'+
+      '<div class="edit-label">名称</div>'+
+      '<input class="edit-name-input inp-name" type="text" value="'+item.name+'" placeholder="名称">'+
+      '<div class="edit-month-row" style="margin-top:4px">'+
+        '<div class="edit-month-col">'+
+          '<div class="edit-sublabel">合計（元本＋利益）</div>'+
+          '<input class="edit-input inp-total" type="number" inputmode="numeric" value="'+total+'" placeholder="0">'+
+        '</div>'+
+        '<div class="edit-month-col">'+
+          '<div class="edit-sublabel">うち利益</div>'+
+          '<input class="edit-input inp-profit" type="number" inputmode="numeric" value="'+profit+'" placeholder="0">'+
+        '</div>'+
+      '</div>'+
+      '<div style="font-size:10px;color:var(--text-muted);margin-top:4px">元本 = 合計 − 利益　で自動計算されます</div>'+
+      '<textarea class="edit-note inp-note" placeholder="メモ（任意）">'+(item.note||'')+'</textarea>'+
+      '<div class="btn-row"><button class="btn-save">保存</button><button class="btn-cancel">キャンセル</button></div>'+
+    '</div>';
+
+  card.querySelector('.card-display').addEventListener('click', e => {
+    if (card.classList.contains('editing')) return;
+    card.closest('.cards-grid').querySelectorAll('.card.editing').forEach(c=>c.classList.remove('editing'));
+    card.classList.add('editing');
+    card.querySelector('.inp-total').focus();
+  });
+  card.querySelector('.btn-save').addEventListener('click', e => {
+    e.stopPropagation();
+    data.invests[idx].name   = card.querySelector('.inp-name').value.trim() || data.invests[idx].name;
+    data.invests[idx].total  = parseFloat(card.querySelector('.inp-total').value)||0;
+    data.invests[idx].profit = parseFloat(card.querySelector('.inp-profit').value)||0;
+    data.invests[idx].note   = card.querySelector('.inp-note').value.trim();
+    saveData(data); renderAll();
+  });
+  card.querySelector('.btn-cancel').addEventListener('click', e => {
+    e.stopPropagation(); card.classList.remove('editing');
+  });
+  return card;
+}
+
+// ── Stock card (持株) ──
+function renderStockCard(item, idx) {
+  const card = document.createElement('div');
+  card.className = 'card';
+  const avg     = item.avgPrice     || 0;
+  const shares  = item.shares       || 0;
+  const current = item.currentPrice || 0;
+  const cost    = avg * shares;           // 取得原価
+  const market  = current * shares;       // 時価評価額
+  const pnl     = market - cost;          // 含み損益
+  const pnlPct  = cost > 0 ? ((pnl / cost) * 100).toFixed(2) : null;
+  const pnlClass = pnl > 0 ? 'gain' : pnl < 0 ? 'loss' : '';
+  const pnlSign  = pnl > 0 ? '+' : '';
+
+  card.innerHTML =
+    '<div class="edit-hint">編集</div>'+
+    '<div class="card-display">'+
+      '<div class="card-icon">'+item.icon+'</div>'+
+      '<div class="card-name">'+item.name+'</div>'+
+      '<div class="card-value">'+fmt(market)+'<span style="font-size:13px;color:var(--text-muted);margin-left:2px">円</span></div>'+
+      '<div class="stock-row">'+
+        '<div class="stock-cell">'+
+          '<div class="stock-cell-label">平均取得株価</div>'+
+          '<div class="stock-cell-val">'+fmt(avg)+' 円</div>'+
+        '</div>'+
+        '<div class="stock-cell">'+
+          '<div class="stock-cell-label">持株数</div>'+
+          '<div class="stock-cell-val">'+shares.toLocaleString('ja-JP')+' 株</div>'+
+        '</div>'+
+        '<div class="stock-cell">'+
+          '<div class="stock-cell-label">現在株価</div>'+
+          '<div class="stock-cell-val">'+fmt(current)+' 円</div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="stock-pnl">'+
+        '<div class="stock-pnl-label">含み損益</div>'+
+        '<div class="stock-pnl-val '+pnlClass+'">'+(pnl===0?'—':pnlSign+fmt(pnl)+' 円'+(pnlPct?' ('+pnlSign+pnlPct+'%)':''))+'</div>'+
+        (cost>0?'<div class="stock-pnl-label" style="margin-left:auto">取得原価 '+fmt(cost)+' 円</div>':'')+
+      '</div>'+
+      (item.note?'<div class="card-sub" style="margin-top:4px;font-style:italic">'+item.note+'</div>':'')+
+    '</div>'+
+    '<div class="card-edit">'+
+      '<div class="edit-label">銘柄名</div>'+
+      '<input class="edit-name-input inp-name" type="text" value="'+item.name+'" placeholder="銘柄名">'+
+      '<div class="edit-month-row" style="margin-top:4px">'+
+        '<div class="edit-month-col">'+
+          '<div class="edit-sublabel">平均取得株価（円）</div>'+
+          '<input class="edit-input inp-avg" type="number" inputmode="decimal" step="any" value="'+avg+'" placeholder="0">'+
+        '</div>'+
+        '<div class="edit-month-col">'+
+          '<div class="edit-sublabel">持株数（株）</div>'+
+          '<input class="edit-input inp-shares" type="number" inputmode="decimal" step="any" value="'+shares+'" placeholder="0">'+
+        '</div>'+
+      '</div>'+
+      '<div class="edit-sublabel" style="margin-top:4px">現在株価（円）</div>'+
+      '<input class="edit-input inp-current" type="number" inputmode="decimal" step="any" value="'+current+'" placeholder="0">'+
+      '<textarea class="edit-note inp-note" placeholder="メモ（任意）">'+(item.note||'')+'</textarea>'+
+      '<div class="btn-row"><button class="btn-save">保存</button><button class="btn-cancel">キャンセル</button></div>'+
+    '</div>';
+
+  card.querySelector('.card-display').addEventListener('click', e => {
+    if (card.classList.contains('editing')) return;
+    card.closest('.cards-grid').querySelectorAll('.card.editing').forEach(c=>c.classList.remove('editing'));
+    card.classList.add('editing');
+    card.querySelector('.inp-avg').focus();
+  });
+  card.querySelector('.btn-save').addEventListener('click', e => {
+    e.stopPropagation();
+    data.invests[idx].name         = card.querySelector('.inp-name').value.trim() || data.invests[idx].name;
+    data.invests[idx].avgPrice     = parseFloat(card.querySelector('.inp-avg').value)||0;
+    data.invests[idx].shares       = parseFloat(card.querySelector('.inp-shares').value)||0;
+    data.invests[idx].currentPrice = parseFloat(card.querySelector('.inp-current').value)||0;
+    data.invests[idx].note         = card.querySelector('.inp-note').value.trim();
+    saveData(data); renderAll();
+  });
+  card.querySelector('.btn-cancel').addEventListener('click', e => {
+    e.stopPropagation(); card.classList.remove('editing');
+  });
+  return card;
+}
+
+
+function renderSimpleCard(item, category, idx) {
+  const card = document.createElement('div');
+  card.className = 'card';
+  const isMainBank = (category==='banks' && idx===0);
+  const mainBadge = isMainBank
+    ? '<span style="font-size:8px;letter-spacing:0.1em;color:var(--accent);background:var(--accent-light);border:1px solid rgba(138,117,96,0.2);padding:2px 7px;border-radius:20px;margin-left:6px">引落口座</span>'
+    : '';
+  const deleteBtn = (!isMainBank && category==='banks')
+    ? '<button class="delete-btn" onclick="deleteItem(\'banks\',\''+item.id+'\',event)">削除</button>'
+    : '';
+  card.innerHTML =
+    '<div class="edit-hint">編集</div>'+
+    deleteBtn+
+    '<div class="card-display">'+
+      '<div class="card-icon">'+item.icon+'</div>'+
+      '<div style="display:flex;align-items:center;margin-bottom:5px">'+
+        '<div class="card-name" style="margin-bottom:0">'+item.name+'</div>'+
+        mainBadge+
+      '</div>'+
+      '<div class="card-value">'+fmt(item.value)+'<span style="font-size:13px;color:var(--text-muted);margin-left:2px">円</span></div>'+
+      (item.note?'<div class="card-sub" style="margin-top:4px;font-style:italic">'+item.note+'</div>':'')+
+    '</div>'+
+    '<div class="card-edit">'+
+      '<div class="edit-label">名称</div>'+
+      '<input class="edit-name-input inp-name" type="text" value="'+item.name+'" placeholder="口座名">'+
+      (category==='banks'&&idx===0?'<div style="font-size:9px;color:var(--text-muted);margin-top:2px">※ 25日の自動引落はこの口座から行われます</div>':'')+
+      '<div class="edit-label" style="margin-top:4px">残高</div>'+
+      '<input class="edit-input inp-val" type="number" inputmode="numeric" value="'+item.value+'" placeholder="0">'+
+      '<textarea class="edit-note inp-note" placeholder="メモ（任意）">'+(item.note||'')+'</textarea>'+
+      '<div class="btn-row"><button class="btn-save">保存</button><button class="btn-cancel">キャンセル</button></div>'+
+    '</div>';
+  card.querySelector('.card-display').addEventListener('click', e => {
+    if (card.classList.contains('editing')) return;
+    card.closest('.cards-grid').querySelectorAll('.card.editing').forEach(c=>c.classList.remove('editing'));
+    card.classList.add('editing');
+    card.querySelector('.inp-name').focus();
+  });
+  card.querySelector('.btn-save').addEventListener('click', e => {
+    e.stopPropagation();
+    data[category][idx].name  = card.querySelector('.inp-name').value.trim() || data[category][idx].name;
+    data[category][idx].value = parseFloat(card.querySelector('.inp-val').value)||0;
+    data[category][idx].note  = card.querySelector('.inp-note').value.trim();
+    saveData(data); renderAll();
+  });
+  card.querySelector('.btn-cancel').addEventListener('click', e => {
+    e.stopPropagation(); card.classList.remove('editing');
+  });
+  return card;
+}
+
+// ── Credit card (2-month) ──
+function renderCreditCard(item, idx) {
+  const card = document.createElement('div');
+  card.className = 'card';
+  const tl=monthLabel(0), nl=monthLabel(1);
+  const now=new Date(), thisY=now.getFullYear(), thisM=now.getMonth();
+  const amex = isAmex(item.name);
+  let badgeHtml;
+  if (amex) {
+    const amexPast = isAmexDebitDayPast(thisY, thisM);
+    const amexLabel = amexDebitDayLabel(thisY, thisM);
+    badgeHtml = amexPast
+      ? '<span class="debit-badge done" style="font-size:8px;padding:2px 7px">✓ 引落済</span>'
+      : '<span class="debit-badge upcoming" style="font-size:8px;padding:2px 7px">📅 '+amexLabel+'引落</span>';
+  } else {
+    const ddLabel=debitDayLabel(thisY,thisM), ddPast=isDebitDayPast(thisY,thisM);
+    badgeHtml = ddPast
+      ? '<span class="debit-badge done" style="font-size:8px;padding:2px 7px">✓ 引落済</span>'
+      : '<span class="debit-badge upcoming" style="font-size:8px;padding:2px 7px">📅 '+ddLabel+'引落</span>';
+  }
+  card.innerHTML =
+    '<div class="edit-hint">編集</div>'+
+    '<button class="delete-btn" onclick="deleteItem(\'credits\',\''+item.id+'\',event)">削除</button>'+
+    '<div class="card-display">'+
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">'+
+        '<div>'+
+          '<div class="card-icon" style="margin-bottom:4px">'+item.icon+'</div>'+
+          '<div class="card-name" style="margin-bottom:0">'+item.name+'</div>'+
+        '</div>'+
+        badgeHtml+
+      '</div>'+
+      '<div class="credit-months">'+
+        '<div class="credit-month-block">'+
+          '<div class="credit-month-tag">今月 '+tl+'</div>'+
+          '<div class="credit-month-val">'+fmt(item.thisMonth)+'<span style="font-size:11px;margin-left:2px;color:var(--text-muted)">円</span></div>'+
+        '</div>'+
+        '<div class="credit-divider"></div>'+
+        '<div class="credit-month-block">'+
+          '<div class="credit-month-tag" style="color:var(--text-muted)">来月 '+nl+'</div>'+
+          '<div class="credit-month-val" style="color:var(--text-muted)">'+fmt(item.nextMonth)+'<span style="font-size:11px;margin-left:2px">円</span></div>'+
+        '</div>'+
+      '</div>'+
+      (item.note?'<div class="card-sub" style="margin-top:6px;font-style:italic">'+item.note+'</div>':'')+
+    '</div>'+
+    '<div class="card-edit">'+
+      '<div class="edit-label">カード名</div>'+
+      '<input class="edit-name-input inp-name" type="text" value="'+item.name+'" placeholder="カード名">'+
+      '<div class="edit-month-row" style="margin-top:2px">'+
+        '<div class="edit-month-col">'+
+          '<div class="edit-sublabel">今月 ('+tl+')</div>'+
+          '<input class="edit-input inp-this" type="number" inputmode="numeric" value="'+item.thisMonth+'" placeholder="0">'+
+        '</div>'+
+        '<div class="edit-month-col">'+
+          '<div class="edit-sublabel">来月 ('+nl+')</div>'+
+          '<input class="edit-input inp-next" type="number" inputmode="numeric" value="'+item.nextMonth+'" placeholder="0">'+
+        '</div>'+
+      '</div>'+
+      '<textarea class="edit-note inp-note" placeholder="メモ（任意）">'+(item.note||'')+'</textarea>'+
+      '<div class="btn-row"><button class="btn-save">保存</button><button class="btn-cancel">キャンセル</button></div>'+
+    '</div>';
+  card.querySelector('.card-display').addEventListener('click', e => {
+    if (card.classList.contains('editing')) return;
+    card.closest('.cards-grid').querySelectorAll('.card.editing').forEach(c=>c.classList.remove('editing'));
+    card.classList.add('editing');
+    card.querySelector('.inp-name').focus();
+  });
+  card.querySelector('.btn-save').addEventListener('click', e => {
+    e.stopPropagation();
+    data.credits[idx].name      = card.querySelector('.inp-name').value.trim() || data.credits[idx].name;
+    data.credits[idx].thisMonth = parseFloat(card.querySelector('.inp-this').value)||0;
+    data.credits[idx].nextMonth = parseFloat(card.querySelector('.inp-next').value)||0;
+    data.credits[idx].note      = card.querySelector('.inp-note').value.trim();
+    saveData(data); renderAll();
+  });
+  card.querySelector('.btn-cancel').addEventListener('click', e => {
+    e.stopPropagation(); card.classList.remove('editing');
+  });
+  return card;
+}
+
+// ── Fixed costs card ──
+function renderFixedCard() {
+  const wrap = document.getElementById('fixedCard');
+  wrap.innerHTML = '';
+  const card = document.createElement('div');
+  card.className = 'fixed-card';
+  const now=new Date(), thisY=now.getFullYear(), thisM=now.getMonth();
+  const ddLabel = debitDayLabel(thisY,thisM);
+  const ddPast  = isDebitDayPast(thisY,thisM);
+  const badgeHtml = ddPast
+    ? '<div class="debit-badge done">✓ 今月引落済 ('+ddLabel+')</div>'
+    : '<div class="debit-badge upcoming">📅 引落日 '+(thisM+1)+'月'+ddLabel+'</div>';
+  const total = data.fixed.reduce((s,f)=>s+f.value,0);
+  let itemsHtml='';
+  data.fixed.forEach(f=>{
+    itemsHtml+='<div class="fixed-item">'+
+      '<div class="fixed-item-name">'+f.name+'</div>'+
+      '<div class="fixed-item-val">'+(f.value?fmt(f.value)+' 円':'<span style="color:var(--text-muted);font-size:13px">—</span>')+'</div>'+
+    '</div>';
+  });
+  let editRowsHtml='';
+  data.fixed.forEach((f,i)=>{
+    editRowsHtml+='<div class="fixed-edit-row" style="display:grid;grid-template-columns:1fr 1fr auto;gap:7px;align-items:end">'+
+      '<input class="fixed-edit-name" type="text" value="'+f.name+'" placeholder="項目名" data-fi="'+i+'">'+
+      '<input class="edit-input" type="number" inputmode="numeric" value="'+f.value+'" placeholder="0" data-fv="'+i+'" style="font-size:17px;padding:6px 9px">'+
+      '<button type="button" style="background:var(--red-bg);color:var(--red);border:1px solid rgba(192,57,43,0.3);font-size:11px;padding:6px 10px;cursor:pointer;border-radius:1px;min-height:44px;white-space:nowrap" data-fd="'+f.id+'">削除</button>'+
+    '</div>';
+  });
+  card.innerHTML =
+    '<div class="edit-hint">編集</div>'+
+    '<div class="fixed-display">'+
+      '<div class="fixed-card-header">'+
+        '<div>'+
+          '<div class="fixed-card-title" style="margin-bottom:6px">毎月の口座引落</div>'+
+          badgeHtml+
+        '</div>'+
+        '<div style="font-size:9px;letter-spacing:0.12em;color:var(--text-muted);text-transform:uppercase">クリックで編集</div>'+
+      '</div>'+
+      itemsHtml+
+      '<div class="fixed-total-row"><div class="fixed-total-label">月額合計</div><div class="fixed-total-val">'+fmt(total)+' 円</div></div>'+
+    '</div>'+
+    '<div class="fixed-edit">'+
+      '<div class="edit-label">固定費 編集</div>'+
+      '<div class="fixed-edit-grid">'+editRowsHtml+'</div>'+
+      '<div class="btn-row" style="margin-top:4px"><button class="btn-save">保存</button><button class="btn-cancel">キャンセル</button></div>'+
+    '</div>';
+  card.querySelector('.fixed-display').addEventListener('click', e=>{
+    if (card.classList.contains('editing')) return;
+    card.classList.add('editing');
+    card.querySelector('.fixed-edit-name').focus();
+  });
+  card.querySelector('.btn-save').addEventListener('click', e=>{
+    e.stopPropagation();
+    card.querySelectorAll('[data-fi]').forEach(el=>{ data.fixed[+el.dataset.fi].name=el.value.trim()||'—'; });
+    card.querySelectorAll('[data-fv]').forEach(el=>{ data.fixed[+el.dataset.fv].value=parseFloat(el.value)||0; });
+    saveData(data); renderAll();
+  });
+  card.querySelectorAll('[data-fd]').forEach(btn=>{
+    btn.addEventListener('click', e=>{
+      e.stopPropagation();
+      data.fixed = data.fixed.filter(f=>f.id!==btn.dataset.fd);
+      saveData(data); renderAll();
+    });
+  });
+  card.querySelector('.btn-cancel').addEventListener('click', e=>{
+    e.stopPropagation(); card.classList.remove('editing');
+  });
+  wrap.appendChild(card);
+}
+
+// ── Salary card ──
+function renderSalaryCard() {
+  const wrap = document.getElementById('salaryCard');
+  wrap.innerHTML='';
+  const card = document.createElement('div');
+  card.className='salary-card';
+  const now=new Date(), thisY=now.getFullYear(), thisM=now.getMonth();
+  const nextM=thisM===11?0:thisM+1, nextY=thisM===11?thisY+1:thisY;
+  const thisPdLabel=paydayLabel(thisY,thisM), nextPdLabel=paydayLabel(nextY,nextM);
+  const thisPaid=isPaydayPast(thisY,thisM);
+  const tl=(thisM+1)+'月', nl=(nextM+1)+'月';
+  const badgeClass=thisPaid?'salary-payday-badge paid':'salary-payday-badge';
+  const badgeTxt=thisPaid?'今月分 振込済 ('+tl+thisPdLabel+')':'今月の給与日 '+tl+thisPdLabel;
+  card.innerHTML=
+    '<div class="edit-hint">編集</div>'+
+    '<div class="salary-display">'+
+      '<div class="salary-header">'+
+        '<div class="salary-header-left">'+
+          '<div class="salary-card-title">給与 入金予定</div>'+
+          '<div class="'+badgeClass+'"><span>💰</span><span>'+badgeTxt+'</span></div>'+
+        '</div>'+
+        '<div style="font-size:9px;letter-spacing:0.1em;color:var(--text-muted);text-transform:uppercase">クリックで編集</div>'+
+      '</div>'+
+      '<div class="salary-months">'+
+        '<div class="salary-month-block this-month'+(thisPaid?' paid-out':'')+'">'+
+          '<div class="salary-month-tag">今月 '+tl+'</div>'+
+          (thisPaid&&data.salary.thisMonth===0
+            ?'<div class="salary-month-val zeroed">振込済</div><div class="salary-zero-note">自動クリア済 ('+thisPdLabel+'到来)</div>'
+            :'<div class="salary-month-val">'+fmt(data.salary.thisMonth)+'<span style="font-size:11px;margin-left:2px;color:var(--text-muted)">円</span></div>')+
+        '</div>'+
+        '<div class="salary-month-block">'+
+          '<div class="salary-month-tag">来月 '+nl+'</div>'+
+          '<div class="salary-month-val" style="color:var(--text-mid)">'+fmt(data.salary.nextMonth)+'<span style="font-size:11px;margin-left:2px;color:var(--text-muted)">円</span></div>'+
+          '<div class="salary-zero-note">給与日 '+nl+nextPdLabel+'</div>'+
+        '</div>'+
+      '</div>'+
+      (data.salary.note?'<div style="font-size:10px;color:var(--text-muted);font-style:italic;margin-top:8px">'+data.salary.note+'</div>':'')+
+    '</div>'+
+    '<div class="salary-edit">'+
+      '<div class="edit-label">給与 編集</div>'+
+      '<div class="edit-month-row">'+
+        '<div class="edit-month-col">'+
+          '<div class="edit-sublabel">今月 '+tl+' (給与日 '+thisPdLabel+')</div>'+
+          '<input class="edit-input sal-this" type="number" inputmode="numeric" value="'+data.salary.thisMonth+'" placeholder="0">'+
+        '</div>'+
+        '<div class="edit-month-col">'+
+          '<div class="edit-sublabel">来月 '+nl+' (給与日 '+nextPdLabel+')</div>'+
+          '<input class="edit-input sal-next" type="number" inputmode="numeric" value="'+data.salary.nextMonth+'" placeholder="0">'+
+        '</div>'+
+      '</div>'+
+      '<textarea class="edit-note" placeholder="メモ（任意）">'+(data.salary.note||'')+'</textarea>'+
+      '<div class="btn-row"><button class="btn-save">保存</button><button class="btn-cancel">キャンセル</button></div>'+
+    '</div>';
+  card.querySelector('.salary-display').addEventListener('click', e=>{
+    if (card.classList.contains('editing')) return;
+    card.classList.add('editing'); card.querySelector('.sal-this').focus();
+  });
+  card.querySelector('.btn-save').addEventListener('click', e=>{
+    e.stopPropagation();
+    data.salary.thisMonth=parseFloat(card.querySelector('.sal-this').value)||0;
+    data.salary.nextMonth=parseFloat(card.querySelector('.sal-next').value)||0;
+    data.salary.note=card.querySelector('.edit-note').value.trim();
+    saveData(data); renderAll();
+  });
+  card.querySelector('.btn-cancel').addEventListener('click', e=>{
+    e.stopPropagation(); card.classList.remove('editing');
+  });
+  wrap.appendChild(card);
+}
+
+// ── 追加・削除 ──
+function genId(prefix) {
+  return prefix + Date.now().toString(36) + Math.random().toString(36).slice(2,5);
+}
+
+function deleteItem(category, id, e) {
+  if (e) e.stopPropagation();
+  if (!confirm('削除しますか？')) return;
+  data[category] = data[category].filter(item=>item.id!==id);
+  saveData(data); renderAll();
+}
+
+function addBank() {
+  data.banks.push({id:genId('b'),icon:'🏦',name:'口座'+(data.banks.length+1),value:0,note:''});
+  saveData(data); renderAll();
+}
+
+function addCredit() {
+  data.credits.push({id:genId('c'),icon:'💳',name:'カード'+(data.credits.length+1),thisMonth:0,nextMonth:0,note:''});
+  saveData(data); renderAll();
+}
+
+function addFixed() {
+  data.fixed.push({id:genId('f'),name:'項目'+(data.fixed.length+1),value:0});
+  saveData(data); renderAll();
+}
+
+// ── Render all ──
+function renderAll() {
+  const bg=document.getElementById('bankGrid'); bg.innerHTML='';
+  data.banks.forEach((item,i)=>bg.appendChild(renderSimpleCard(item,'banks',i)));
+
+  const cg=document.getElementById('creditGrid'); cg.innerHTML='';
+  data.credits.forEach((item,i)=>cg.appendChild(renderCreditCard(item,i)));
+
+  renderFixedCard();
+  renderSalaryCard();
+
+  const ig=document.getElementById('investGrid'); ig.innerHTML='';
+  data.invests.forEach((item,i)=>{
+    if (item.nisaType)  ig.appendChild(renderNisaCard(item,i));
+    else if (item.stockType) ig.appendChild(renderStockCard(item,i));
+    else ig.appendChild(renderSimpleCard(item,'invests',i));
+  });
+
+  const totalBank      = data.banks.reduce((s,b)=>s+b.value,0);
+  const totalCreditT   = data.credits.reduce((s,c)=>s+c.thisMonth,0);
+  const totalCreditN   = data.credits.reduce((s,c)=>s+c.nextMonth,0);
+  const totalNisa      = data.invests.filter(v=>v.nisaType).reduce((s,v)=>s+(v.total||0),0);
+  const totalStock     = data.invests.filter(v=>v.stockType).reduce((s,v)=>s+(v.currentPrice||0)*(v.shares||0),0);
+  const totalOther     = data.invests.filter(v=>!v.nisaType&&!v.stockType).reduce((s,v)=>s+(v.value||0),0);
+  const totalFixed     = data.fixed.reduce((s,f)=>s+f.value,0);
+  const salaryThis     = data.salary.thisMonth;
+  const salaryNext     = data.salary.nextMonth;
+
+  // 総資産 = 銀行残高のみ
+  const totalAssets    = totalBank;
+  // 運用合計 = 持株時価 ＋ NISA ＋ その他投資
+  const totalInvest    = totalStock + totalNisa + totalOther;
+
+  // 引落済みフラグ判定
+  const now2 = new Date();
+  const monthRk2 = now2.getFullYear()+'-'+now2.getMonth();
+  const debitDone = data.debitAutoProcessMonth === monthRk2;
+  const amexDebitDate = calcAmexDebitDay(now2.getFullYear(), now2.getMonth());
+  const amexMonthRk = amexDebitDate.getFullYear()+'-'+amexDebitDate.getMonth();
+  const amexDone = data.amexAutoProcessMonth === amexMonthRk;
+
+  // CC合計を「引落済か否か」で分類
+  const totalCreditTAmex    = data.credits.filter(c=>isAmex(c.name)).reduce((s,c)=>s+c.thisMonth,0);
+  const totalCreditTNonAmex = data.credits.filter(c=>!isAmex(c.name)).reduce((s,c)=>s+c.thisMonth,0);
+
+  // 今月純資産：
+  //   非アメックス今月CC → debitDoneなら引落済、そうでなければ引く
+  //   アメックス今月CC  → amexDoneなら引落済、そうでなければ引く
+  //   固定費           → debitDoneなら残高反映済、そうでなければ引く
+  const ccThisOwed = (debitDone ? 0 : totalCreditTNonAmex) + (amexDone ? 0 : totalCreditTAmex);
+  const fixedOwed  = debitDone ? 0 : totalFixed;
+  const netWorthThis = totalBank + salaryThis - ccThisOwed - fixedOwed;
+
+  // 来月純資産：
+  //   引落前：CC今月（未払分）＋CC来月＋固定費×2
+  //   引落済：CC来月＋固定費×1（今月分は残高反映済）
+  const ccThisOwedForNext = (debitDone ? 0 : totalCreditTNonAmex) + (amexDone ? 0 : totalCreditTAmex);
+  const netWorthNext = debitDone
+    ? totalBank + salaryNext - (amexDone ? 0 : totalCreditTAmex) - totalCreditN - totalFixed
+    : totalBank + salaryNext - ccThisOwedForNext - totalCreditN - totalFixed * 2;
+
+  // NISA込み純資産
+  const netWorthWithNisaThis = netWorthThis + totalInvest;
+
+  // 計算式テキスト生成
+  const fmtF = n => fmt(n);
+  const thisFormulaParts = [
+    '銀行 '+fmtF(totalBank),
+    salaryThis ? '＋ 給与 '+fmtF(salaryThis) : '',
+    ccThisOwed ? '▲ CC未払 '+fmtF(ccThisOwed) : (debitDone&&amexDone ? '（CC引落済）' : ''),
+    fixedOwed  ? '▲ 固定費 '+fmtF(fixedOwed) : '（固定費引落済）',
+    !debitDone&&totalCreditTAmex&&amexDone ? '　※アメックスは引落済' : '',
+    debitDone&&totalCreditTAmex&&!amexDone ? '　※アメックス▲'+fmtF(totalCreditTAmex)+'は未払' : '',
+  ].filter(Boolean).join('\n');
+
+  const nextFormulaParts = debitDone ? [
+    '銀行 '+fmtF(totalBank),
+    salaryNext                           ? '＋ 給与来月 '+fmtF(salaryNext)             : '',
+    (!amexDone && totalCreditTAmex)      ? '▲ アメックス今月 '+fmtF(totalCreditTAmex)  : '',
+    totalCreditN                         ? '▲ CC来月 '+fmtF(totalCreditN)              : '',
+    totalFixed                           ? '▲ 固定費 '+fmtF(totalFixed)                : '',
+    '（非アメックスCC・固定費は引落済）',
+  ].filter(Boolean).join('\n') : [
+    '銀行 '+fmtF(totalBank),
+    salaryNext          ? '＋ 給与来月 '+fmtF(salaryNext)          : '',
+    ccThisOwedForNext   ? '▲ CC今月未払 '+fmtF(ccThisOwedForNext)  : '',
+    totalCreditN        ? '▲ CC来月 '+fmtF(totalCreditN)           : '',
+    totalFixed          ? '▲ 固定費×2 '+fmtF(totalFixed*2)         : '',
+    '（引落前）',
+  ].filter(Boolean).join('\n');
+
+  const nisaFormulaParts = [
+    '純資産 '+fmtF(netWorthThis),
+    totalInvest ? '＋ 運用 '+fmtF(totalInvest) : '',
+  ].filter(Boolean).join('\n');
+  document.getElementById('netWorthWithNisa').innerHTML    = fmt(netWorthWithNisaThis)+'<span class="unit">円</span>';
+  document.getElementById('formulaThis').style.whiteSpace  = 'pre';
+  document.getElementById('formulaThis').textContent       = thisFormulaParts;
+  document.getElementById('formulaWithNisa').style.whiteSpace = 'pre';
+  document.getElementById('formulaWithNisa').textContent   = nisaFormulaParts;
+  document.getElementById('formulaSummaryThis').style.whiteSpace = 'pre';
+  document.getElementById('formulaSummaryThis').textContent = thisFormulaParts;
+  document.getElementById('formulaSummaryNext').style.whiteSpace = 'pre';
+  document.getElementById('formulaSummaryNext').textContent = nextFormulaParts;
+  document.getElementById('totalAssetsGross').textContent  = fmt(totalAssets)+' 円';
+  document.getElementById('totalInvestments').textContent  = fmt(totalInvest)+' 円';
+  document.getElementById('totalAssetsThis').textContent   = fmt(netWorthThis)+' 円';
+  document.getElementById('totalAssetsNext').textContent   = fmt(netWorthNext)+' 円';
+  document.getElementById('totalSalaryThis').textContent   = salaryThis?'+'+fmt(salaryThis)+' 円':'—';
+  document.getElementById('totalCreditThis').textContent   = fmt(totalCreditT)+' 円';
+  document.getElementById('totalCreditNext').textContent   = fmt(totalCreditN)+' 円';
+  document.getElementById('totalFixed').textContent        = fmt(totalFixed)+' 円';
+
+  if (data.updatedAt) {
+    const d=new Date(data.updatedAt);
+    document.getElementById('lastUpdated').textContent =
+      '最終更新 '+d.toLocaleDateString('ja-JP')+' '+d.toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
+  }
+}
+
+document.getElementById('headerDate').textContent =
+  new Date().toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric',weekday:'short'});
+
+let data = null;
+
+const memoArea=document.getElementById('memoArea');
+let memoTimer;
+memoArea.addEventListener('input',()=>{
+  if (!data) return;
+  clearTimeout(memoTimer);
+  memoTimer=setTimeout(()=>{ data.memo=memoArea.value; saveData(data); },800);
+});
+
+// ページ離脱・バックグラウンド移行時にも保存
+window.addEventListener('beforeunload', ()=>{
+  if (data && currentStorageKey) { try { localStorage.setItem(currentStorageKey, JSON.stringify(data)); } catch(e){} }
+});
+document.addEventListener('visibilitychange', ()=>{
+  if (document.visibilityState==='hidden' && data && currentStorageKey) {
+    try { localStorage.setItem(currentStorageKey, JSON.stringify(data)); } catch(e){}
+  }
+});
+
+// localStorage が使えるか起動時チェック
+(function(){
+  try { localStorage.setItem('__test__','1'); localStorage.removeItem('__test__'); }
+  catch(e) { const w=document.getElementById('storage-warn'); if(w) w.style.display='block'; }
+})();
+
+// 起動
+initAuth();
+</script>
+</body>
+</html>
